@@ -1,0 +1,335 @@
+/**
+ * Implements GASchunky app.
+ *
+ * Image display demo using chunky to planer conversion with 4x4 dither.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class GASchunky {
+    field ChunkyImage rotoImage; 
+    field Image monitor;
+    
+    field Plasma plasma;
+    field RotoZoom rotozoom;
+      
+    /**
+     * Constructor.
+     */
+    constructor GASchunky new () {
+        var int i;
+        
+        do Sinus.init();
+        
+        let monitor = Monitor.newImage();
+        
+        let rotoImage = Head.newChunkyImage();
+        
+        let plasma = Plasma.new(10, 42, 12, 148);
+        // Basic plasma parameters used for debugging sinus table
+        // scaling.
+        //do plasma.setParameters(1,1,1,1, 1,1,1,1, 0,0,0,0);
+        
+        let rotozoom = RotoZoom.new(rotoImage, 10, 42, 12, 148);
+        
+        do Output.moveCursor(22, 3);
+        do Output.printString("Real-time Plasma and Rotozoom demo.    Gavin Stewart 2013.");
+        do Output.moveCursor(0, 0); 
+        
+        //do MemoryToo.plotHoles();
+        //do Sys.halt();
+        	          
+        return this;
+    }
+    
+    /**
+     * Destructor.
+     */
+    method void dispose () {
+        do monitor.dispose();
+        do image.dispose();
+        
+        do Memory.deAlloc(this);   
+        return;
+    }
+        
+    method void run () {
+        var int tick, runFor;
+        var int u, v;                       // Texture coordinates.
+        var int ud, vd;                     // Sinus angle for tex coordinates.
+        var int a, z;                       // Angle and Zoom.         
+        var int zStep;                      // Zoom step.
+        var int brightness, brightnessStep; // Image brightness.
+              
+        // ** RotoZoom Parameters** //
+        let a = 224;
+        let z = 50;
+        let zStep = 4;     
+        let ud = 315;                         // Sine
+        let vd = 45;                        // Cosine
+        let brightness = 16;
+        let brightnessStep = 1;
+        while (true) {
+            let tick = 0;
+            
+             // ** Start delay ** //
+             do Sys.wait(1000);
+            
+            // ** Computer Monitor ** //         
+            //do monitor.draw(7, 10);
+            do fadeImageIn(monitor, 7, 10);
+        
+            do Sys.wait(3000);                      // View monitor for a bit.
+            
+            do fadeErase(10, 42, 12, 148);          // Fade monitor contents
+                                                    // to white.
+            // ** Plasma ** //
+            let brightness = 32;                    // Start full white.
+            do plasma.setShadeOffset(brightness);   
+            while (brightness > 16) {               // Fade in from white.
+                do plasma.drawFrame();
+                let brightness = brightness - 1;
+                do plasma.setShadeOffset(brightness);
+                let tick = tick + 1;
+            }
+            
+            let runFor = tick + 200;                // Run plasma for a bit.
+            while (tick < runFor) {                    
+                do plasma.drawFrame();
+                let tick = tick + 1;
+            }
+            
+            while (brightness > 0) {                // Fade out to black.
+                do plasma.drawFrame();
+                let brightness = brightness - 1;
+                do plasma.setShadeOffset(brightness);
+                let tick = tick + 1;
+            }        
+            
+            // ** RotoZoom ** //
+            let brightness = 0;                     // Start full black.
+            do rotozoom.setShadeOffset(brightness); 
+            while (brightness < 16) {               // Fade in from black.
+                let u = Sinus.cos(ud) / 2;
+                let v = Sinus.sin(vd) / 2;      
+                
+                do rotozoom.drawFrame(u, v, a, z);
+                let brightness = brightness + 1;
+                do rotozoom.setShadeOffset(brightness);
+                
+                let a = a + 2;
+                
+                let z = z + zStep;
+                if ((z < 20) | (z > 327)) {
+                   let zStep = -zStep;
+                   let z = z + zStep;
+                }
+                
+                let ud = ud + 3;
+                let vd = vd + 2;
+                if (ud > 359) {
+                    let ud = ud - 360;
+                }
+                if (vd > 359) {
+                    let vd = vd - 360;
+                }
+                                
+                let tick = tick + 1;
+            }
+            
+            let runFor = tick + 250;                // Run rotozoom for a bit
+            while (tick < runFor) {
+                let u = Sinus.cos(ud) / 2;
+                let v = Sinus.sin(vd) / 2;          
+                           
+                do rotozoom.drawFrame(u, v, a, z);
+                
+                let a = a + 2;
+                
+                let z = z + zStep;
+                if ((z < 20) | (z > 327)) {
+                   let zStep = -zStep;
+                   let z = z + zStep;
+                }
+                
+                let ud = ud + 3;
+                let vd = vd + 2;
+                if (ud > 359) {
+                    let ud = ud - 360;
+                }
+                if (vd > 359) {
+                    let vd = vd - 360;
+                }
+                
+                let tick = tick + 1;
+            }
+            
+            while (brightness < 33) {               // Fade out to white.
+                let u = Sinus.cos(ud) / 2;
+                let v = Sinus.sin(vd) / 2;      
+                            
+                do rotozoom.drawFrame(u, v, a, z);
+                let brightness = brightness + 1;
+                do rotozoom.setShadeOffset(brightness);
+                
+                let a = a + 2;
+                
+                let z = z + zStep;
+                if ((z < 20) | (z > 327)) {
+                   let zStep = -zStep;
+                   let z = z + zStep;
+                }
+                
+                let ud = ud + 3;
+                let vd = vd + 2;
+                if (ud > 359) {
+                    let ud = ud - 360;
+                }
+                if (vd > 359) {
+                    let vd = vd - 360;
+                }
+                
+                let tick = tick + 1;
+            }
+            
+            //do MemoryToo.plotHoles();
+            //do Sys.halt();
+        }
+        
+        /*
+        let ud = 0;                         // Sine
+        let vd = 90;                        // Cosine
+        while (true) {
+            let u = sinus[ud];
+            let v = sinus[vd];         
+            
+            do image.drawTile(10, 42, 12, 148, u, v);     // Inside monitor image - 1776
+            
+            //do image.drawTile(6, 16, 20, 208, u, v);      // Super sized - 4160 words
+            //do image.drawTile(8, 16, 14, 208, u, v);      // Too large - 2919 words
+            //do image.drawTile(10, 24, 12, 192, u, v);     // OK - 2304 words
+            //do image.drawTile(9, 24, 14, 128, u, v);      // Wider aspect - 1792 words
+            //do image.drawTile(10, 24, 8, 128, u, v);      // Too small - 1024 words
+            
+            //do image.drawTileSurface(surface, surfaceWidth, surfaceHeight, u, v);   // OK - 576 words
+            //do blitSurface(x, y);
+            
+            //do Sys.wait(15);
+            let ud = ud + 4;
+            let vd = vd + 2;
+            if (ud > 360) {
+                let ud = 0;
+            }
+            if (vd > 360) {
+                let vd = 0;
+            }
+        }
+        */
+    
+        return;
+    }
+    
+    /**
+     * Gradually display image to screen, image height must be a factor of 2
+     * for this to work.
+     */
+    method void fadeImageIn (Image image, int x, int y) {  
+        var int i, j;
+        var int screenRow1, screenRow2;
+        var int w, h;
+        var int bitmapRow1, bitmapRow2;
+        var boolean skipBottom;
+        
+        let w = image.getWidth();
+        let h = image.getHeight();
+        
+        let bitmapRow1 = image.getBitmap();
+        let bitmapRow2 = bitmapRow1 + (h * w);
+        
+        let screenRow1 = 16384 + x + (y * 32); 
+        let screenRow2 = screenRow1 + (h * 32); 
+        
+        let skipBottom = true;
+            
+        let j = 1;
+        while (j < h) {   
+            let i = 0;                 
+            while (i < w) {
+                if (j & 1) {
+                    let screenRow1[i] = bitmapRow1[i];
+                } else {
+                    if (skipBottom) {               // Skip very bottom row.
+                        let skipBottom = false;
+                    } else {
+                        let screenRow2[i] = bitmapRow2[i];
+                    }
+                    
+                }
+                let i = i + 1;
+            }
+            do Sys.wait(10);
+            let bitmapRow1 = bitmapRow1 + w;
+            let bitmapRow2 = bitmapRow2 - w;
+            let screenRow1 = screenRow1 + 32;
+            let screenRow2 = screenRow2 - 32;
+            let j = j + 1;    
+        }
+        
+        return;
+    }
+    
+    /**
+     * Gradually erase the screen area to white. Height must be a factor of 2.
+     *
+     * A series of horizontal lines, spaced every other row gradually
+     * progress down from the top and up from the bottom of the area at
+     * the same time. As the lines cross the midpoint, the remainder fo
+     * the image appears to be erased.
+     */
+    method void fadeErase (int x, int y, int w, int h) {
+        var int i, j;
+        var int screenRow1, screenRow2;
+        
+        let screenRow1 = 16384 + x + (y * 32); 
+        let screenRow2 = screenRow1 + ((h - 2) * 32); 
+        
+        // Erase every second line.
+        while (j < h) {
+            let i = 0;
+            while (i < w) {
+                if (j & 1) {
+                    let screenRow1[i] = 0;
+                } else {
+                    let screenRow2[i] = 0;
+                }
+                let i = i + 1;
+            }
+            do Sys.wait(10);
+            let screenRow1 = screenRow1 + 32;
+            let screenRow2 = screenRow2 - 32;
+            let j = j +1;
+        }
+        
+        return;
+    }
+ 
+}

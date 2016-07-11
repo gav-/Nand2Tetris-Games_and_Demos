@@ -1,0 +1,73 @@
+/**
+ * Extra maths functions.
+ *
+ * Version 1.1
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class MathsToo {
+
+    /**
+     * Returns v << n (Logical Shift Left), where: 0 < n < 16
+     */
+    function int lsl(int v, int n) {   
+        while (n > 0) {
+            let v = v + v;              // << 1
+            let n = n - 1;
+        }       
+        return v;
+    }
+
+    /**
+     * Returns v >> n (Logical Shift Right), where: 0 < n < 16
+     */
+    function int lsr(int v, int n) {
+        var int mask, maxMask, outMask, out;
+        
+        let mask = 1;
+        let n = n - 1;                  // Setup mask to one position less.
+        while (n > 0) {                 
+            let mask = mask + mask;     // Lsl mask
+            let n = n - 1;
+        }                               
+        let maxMask = -32767-1;         // 1000 0000 0000 0000 (literal -32768)
+        let outMask = 1;                // 0000 0000 0000 0001
+        while (~(mask = maxMask)) {
+            let mask = mask + mask;         // Lsl mask by one before operation.
+            if (v & mask) {                 // Masked bit is set.
+                let out = out | outMask;    // Set bit in output.
+            }
+            let outMask = outMask + outMask;// Lsl output mask.
+        }
+        return out;
+    }
+    
+    /**
+     * Returns a modulo n
+     */
+    function int mod(int a, int n) {
+        var int q;
+        let q = a / n;
+        return (a - (n * q));
+    }
+}
+ 

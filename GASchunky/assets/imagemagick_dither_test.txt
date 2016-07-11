@@ -1,0 +1,2 @@
+# Scale up image and ordered dither to simulate 4x4 chunky-to-planer conversion.
+convert head.pgm -filter point -resize 400% -ordered-dither 4x4 head_4x4.png

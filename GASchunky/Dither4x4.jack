@@ -1,0 +1,168 @@
+/**
+ * Static class creates a 4x4 dither matrix with lookup for 17 shade values.
+ *
+ * Version 1.0
+ *
+ * Result is a table of 17 x 4 values. Each shade is grouped as 4 rows of 4
+ * pixels each. Each shade is therefore offset into the table in multiples
+ * of 4.
+ *
+ * The table of values is left shifted 4 times in steps of 4 bits, making
+ * 4 tables total.
+ *
+ * Extended: The dither table starts at black for 16x4 values, then the 17x4 
+ * dither shades (starting at black, ending at white), then ends with white for 
+ * 16x4 values. This allows easy fade to black/white by modifying an offset 
+ * into the dither tables, and re-drawing the image.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class Dither4x4 {
+
+    static Array table0, table1, table2, table3;    // Four shifted tables.
+    static int tableLength;                         // Length of table in words.         
+    static int shadeOffset;                         // Offset of shade area.
+    
+    static boolean initialised;
+
+    function void init () {
+        var int i;
+        
+        // Static table only initialised once.
+        if (initialised) {
+            return;
+        }
+        
+        let shadeOffset = 16 * 4;
+        let tableLength =   (16 * 4) +  // 16 black, 4 rows per shade.
+                            (17 * 4) +  // 17 shades, 4 rows per shade.
+                            (16 * 4);   // 16 white, 4 rows per shade.
+        let table0 = Array.new(tableLength);
+                                                              
+        // Initialise first 16 black values.
+        let i = 0;
+        while (i < shadeOffset) {
+            let table0[i] = 15;        // Black is all ones.
+            let i = i + 1;
+        }
+        
+        // Ordered dither values for 4x4 matrix from:
+        //  http://en.wikipedia.org/wiki/Ordered_dithering
+        //  [ 1  9  3 11]
+        //  [13  5 15  7]
+        //  [ 4 12  2 10]
+        //  [16  8 14  6]
+        
+        // We use the inverse/reverse as 1 is black in this architecture.
+        do Dither4x4._setShade(16, 0, 0, 0, 0);       
+        do Dither4x4._setShade(15, 1, 0, 0, 0);
+        do Dither4x4._setShade(14, 1, 0, 4, 0);
+        do Dither4x4._setShade(13, 5, 0, 4, 0);
+        
+        do Dither4x4._setShade(12, 5, 0, 5, 0);
+        do Dither4x4._setShade(11, 5, 2, 5, 0);
+        do Dither4x4._setShade(10, 5, 2, 5, 8);
+        do Dither4x4._setShade( 9, 5, 10, 5, 8);
+        
+        do Dither4x4._setShade( 8, 5, 10, 5, 10);
+        do Dither4x4._setShade( 7, 7, 10, 5, 10);
+        do Dither4x4._setShade( 6, 7, 10, 13, 10);
+        do Dither4x4._setShade( 5, 15, 10, 13, 10);
+        
+        do Dither4x4._setShade( 4, 15, 10, 15, 10);
+        do Dither4x4._setShade( 3, 15, 11, 15, 10);
+        do Dither4x4._setShade( 2, 15, 11, 15, 14);
+        do Dither4x4._setShade( 1, 15, 15, 15, 14);
+        
+        do Dither4x4._setShade( 0, 15, 15, 15, 15);
+        
+        let table1 = Dither4x4._getNewShiftedTable(16);
+        let table2 = Dither4x4._getNewShiftedTable(256);
+        let table3 = Dither4x4._getNewShiftedTable(4096);
+        
+        let initialised = true;
+        
+        return;
+    }
+    
+    /**
+     * Dispose of allocated memory. Not a distructor, this class is static.
+     */
+    function void dispose() {
+        if (initialised) {
+            do table0.dispose();
+            do table1.dispose();
+            do table2.dispose();
+            do table3.dispose();
+        }
+        return;
+    }
+    
+    /**
+     * Return the table.
+     */
+    function Array getTable (int n) {
+        if (n = 0) { return table0; }
+        if (n = 1) { return table1; }
+        if (n = 2) { return table2; }
+        if (n = 3) { return table3; }
+        return table0;
+    }
+    
+    function int getLength () { return tableLength; }
+    function int getOffset () { return shadeOffset; }
+    
+    /**
+     * Set a shade in the table.
+     */
+    function void _setShade (int i, int r0, int r1, int r2, int r3) {
+        var int offset;       
+        //let offset = i * 4;
+        let offset = shadeOffset + (i * 4);     // Skip first 16 black values.
+        
+        let table0[offset    ] = r0;
+        let table0[offset + 1] = r1;
+        let table0[offset + 2] = r2;
+        let table0[offset + 3] = r3;     
+        
+        return;  
+    }
+    
+    /**
+     * Return a new shifted table.
+     */
+    function Array _getNewShiftedTable (int shift) {
+        var int i, n;
+        var Array t;
+        
+        let n = tableLength;
+        let t = Array.new(n);
+        
+        while (i < n) {
+            let t[i] = table0[i] * shift;
+            let i = i + 1;
+        }
+        
+        return t;
+    }
+
+}

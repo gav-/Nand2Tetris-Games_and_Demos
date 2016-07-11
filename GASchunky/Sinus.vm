@@ -1,0 +1,473 @@
+function Sinus.init 1
+push static 1
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
+push constant 360
+call Array.new 1
+pop static 0
+push constant 0
+pop local 0
+push local 0
+push constant 0
+push constant 2
+push constant 3
+push constant 5
+push constant 7
+push constant 9
+push constant 10
+push constant 12
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 14
+push constant 16
+push constant 17
+push constant 19
+push constant 21
+push constant 22
+push constant 24
+push constant 26
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 28
+push constant 29
+push constant 31
+push constant 33
+push constant 34
+push constant 36
+push constant 37
+push constant 39
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 41
+push constant 42
+push constant 44
+push constant 45
+push constant 47
+push constant 48
+push constant 50
+push constant 52
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 53
+push constant 54
+push constant 56
+push constant 57
+push constant 59
+push constant 60
+push constant 62
+push constant 63
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 64
+push constant 66
+push constant 67
+push constant 68
+push constant 69
+push constant 71
+push constant 72
+push constant 73
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 74
+push constant 75
+push constant 77
+push constant 78
+push constant 79
+push constant 80
+push constant 81
+push constant 82
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 83
+push constant 84
+push constant 85
+push constant 86
+push constant 87
+push constant 87
+push constant 88
+push constant 89
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 90
+push constant 91
+push constant 91
+push constant 92
+push constant 93
+push constant 93
+push constant 94
+push constant 95
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 95
+push constant 96
+push constant 96
+push constant 97
+push constant 97
+push constant 97
+push constant 98
+push constant 98
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 98
+push constant 99
+push constant 99
+push constant 99
+push constant 99
+push constant 100
+push constant 100
+push constant 100
+call Sinus._push91 9
+pop local 0
+push local 0
+push constant 100
+push constant 100
+push constant 100
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+call Sinus._push91 9
+pop local 0
+push constant 91
+pop local 0
+label WHILE_EXP0
+push local 0
+push constant 181
+lt
+not
+if-goto WHILE_END0
+push local 0
+push static 0
+add
+push constant 180
+push local 0
+sub
+push static 0
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+label WHILE_EXP1
+push local 0
+push constant 271
+lt
+not
+if-goto WHILE_END1
+push local 0
+push static 0
+add
+push local 0
+push constant 180
+sub
+push static 0
+add
+pop pointer 1
+push that 0
+neg
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP1
+label WHILE_END1
+label WHILE_EXP2
+push local 0
+push constant 360
+lt
+not
+if-goto WHILE_END2
+push local 0
+push static 0
+add
+push constant 360
+push local 0
+sub
+push static 0
+add
+pop pointer 1
+push that 0
+neg
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP2
+label WHILE_END2
+push constant 0
+not
+pop static 1
+push constant 0
+return
+function Sinus._push91 1
+push constant 91
+push argument 0
+sub
+pop local 0
+push local 0
+push constant 0
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+push static 0
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE0
+push local 0
+push constant 1
+gt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push argument 0
+push constant 1
+add
+push static 0
+add
+push argument 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE1
+push local 0
+push constant 2
+gt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push argument 0
+push constant 2
+add
+push static 0
+add
+push argument 3
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE2
+push local 0
+push constant 3
+gt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push argument 0
+push constant 3
+add
+push static 0
+add
+push argument 4
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE3
+push local 0
+push constant 4
+gt
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push argument 0
+push constant 4
+add
+push static 0
+add
+push argument 5
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE4
+push local 0
+push constant 5
+gt
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push argument 0
+push constant 5
+add
+push static 0
+add
+push argument 6
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE5
+push local 0
+push constant 6
+gt
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push argument 0
+push constant 6
+add
+push static 0
+add
+push argument 7
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE6
+push local 0
+push constant 7
+gt
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push argument 0
+push constant 7
+add
+push static 0
+add
+push argument 8
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE7
+push argument 0
+push constant 8
+add
+return
+function Sinus.getTable 0
+push static 0
+return
+function Sinus.sin 0
+push argument 0
+push static 0
+add
+pop pointer 1
+push that 0
+return
+function Sinus.cos 0
+push argument 0
+push constant 90
+add
+pop argument 0
+push argument 0
+push constant 359
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+push constant 360
+sub
+pop argument 0
+label IF_FALSE0
+push argument 0
+push static 0
+add
+pop pointer 1
+push that 0
+return
+function Sinus.resample 7
+push argument 2
+call Array.new 1
+pop local 6
+push argument 1
+push argument 0
+sub
+pop local 2
+push local 2
+push argument 2
+call Math.divide 2
+pop local 3
+push local 2
+push argument 2
+call MathsToo.mod 2
+pop local 4
+push constant 0
+pop local 5
+label WHILE_EXP0
+push local 0
+push argument 2
+lt
+not
+if-goto WHILE_END0
+push local 0
+push local 6
+add
+push argument 0
+push local 1
+add
+call Sinus.sin 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 1
+push local 3
+add
+pop local 1
+push local 5
+push local 4
+add
+pop local 5
+push local 5
+push local 1
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 5
+push argument 2
+sub
+pop local 5
+push local 1
+push constant 1
+add
+pop local 1
+label IF_FALSE0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push local 6
+return

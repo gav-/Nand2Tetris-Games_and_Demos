@@ -1,0 +1,110 @@
+/**
+ * Static ChunkyImage factory class.
+ *
+ * Requires ChunkyImage.jack
+ *
+ * Generated from "head.pgm" by pgm2jack.py
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class Head {
+
+    /**
+     * newChunkyImage - returns a ChunkyImage object containing bitmap data.
+     */
+    function ChunkyImage newChunkyImage () {
+        var ChunkyImage i;
+        var int width, height;
+
+        let width = 32;
+        let height = 32;
+
+        let i = ChunkyImage.newBitmap(width, height);
+
+        do i.push(5,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,7);
+        do i.push(3,1,0,0,0,0,0,0,0,0,0,0,1,3,6,7);
+        do i.push(7,7,5,3,1,0,0,0,0,0,0,0,0,0,1,4);
+        do i.push(0,0,0,0,0,0,0,0,1,3,6,8,11,13,15,15);
+        do i.push(15,14,13,12,10,7,5,2,0,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,3,7,9,10,11,13,15,16,16);
+        do i.push(16,16,15,13,12,11,9,8,4,2,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,4,7,9,10,10,12,13,15,16,16);
+        do i.push(16,16,15,13,12,11,10,9,7,5,2,0,0,0,0,0);
+        do i.push(0,0,0,0,0,3,6,8,9,10,11,12,13,14,15,16);
+        do i.push(16,15,15,13,12,11,10,9,8,7,4,1,0,0,0,0);
+        do i.push(0,0,0,0,1,5,7,8,10,10,11,12,13,13,14,14);
+        do i.push(14,14,14,13,12,11,10,9,8,7,6,2,0,0,0,0);
+        do i.push(0,0,0,0,2,5,7,8,9,10,11,11,12,12,13,13);
+        do i.push(13,13,13,12,11,10,10,9,8,8,6,4,1,0,0,0);
+        do i.push(0,0,0,0,2,5,7,8,9,10,10,11,11,11,11,11);
+        do i.push(11,12,11,11,11,10,10,9,8,8,7,5,1,0,0,0);
+        do i.push(0,0,0,0,2,5,7,8,9,9,10,10,10,10,11,10);
+        do i.push(10,11,11,10,10,10,9,9,8,7,6,5,1,0,0,0);
+        do i.push(0,0,0,0,2,5,7,8,9,9,9,10,9,9,10,10);
+        do i.push(10,10,10,10,10,9,9,9,8,7,6,4,1,0,0,0);
+        do i.push(0,0,3,3,1,4,5,7,8,9,9,9,9,10,9,9);
+        do i.push(10,9,10,9,9,9,9,8,7,6,5,3,1,5,0,0);
+        do i.push(0,0,5,11,1,3,5,6,7,8,8,9,9,9,9,9);
+        do i.push(9,9,9,8,9,9,8,8,7,5,4,1,7,8,0,0);
+        do i.push(0,0,4,7,7,3,6,9,6,7,8,8,8,8,8,8);
+        do i.push(8,8,8,8,8,8,8,6,6,7,3,4,10,5,1,0);
+        do i.push(0,0,2,3,9,8,8,12,12,6,7,7,8,8,8,8);
+        do i.push(8,8,8,8,8,7,6,8,12,9,5,11,3,3,0,0);
+        do i.push(0,0,0,2,5,2,5,8,11,13,10,8,7,9,8,7);
+        do i.push(7,7,8,7,7,10,13,12,8,5,2,3,6,0,0,0);
+        do i.push(0,0,0,0,7,4,2,3,3,8,12,14,13,11,12,8);
+        do i.push(8,11,12,13,13,12,9,4,2,2,2,7,3,0,0,0);
+        do i.push(0,0,0,0,6,4,4,5,2,4,12,11,8,6,9,6);
+        do i.push(6,8,6,7,9,12,6,2,4,5,3,6,1,0,0,0);
+        do i.push(0,0,0,1,10,4,7,9,6,2,4,5,2,4,7,10);
+        do i.push(10,6,4,2,4,5,2,4,9,9,3,10,4,0,0,0);
+        do i.push(0,0,0,0,2,2,7,12,12,9,6,6,8,10,10,12);
+        do i.push(12,9,9,9,6,6,8,11,12,9,3,2,1,0,0,0);
+        do i.push(0,0,0,0,0,1,3,8,11,12,12,13,13,10,10,13);
+        do i.push(12,9,10,12,13,13,12,11,9,4,2,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,1,2,4,8,8,9,9,9,10,13);
+        do i.push(13,10,9,9,9,8,9,6,2,1,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,1,2,4,8,7,9,11,12,13);
+        do i.push(13,12,11,7,7,9,6,3,1,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,1,3,6,6,6,9,5,9,13);
+        do i.push(13,10,5,8,7,5,7,4,2,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,0,3,6,5,8,10,8,3,12);
+        do i.push(12,3,7,10,8,8,6,5,1,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,0,1,5,7,8,10,10,6,3);
+        do i.push(3,4,10,9,8,8,6,3,0,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,0,0,2,9,4,5,9,9,5);
+        do i.push(5,9,9,6,4,9,6,0,0,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,0,0,0,6,9,8,8,7,8);
+        do i.push(8,8,7,9,8,9,3,0,0,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,0,0,0,2,8,7,5,7,4);
+        do i.push(3,5,5,5,9,7,0,0,0,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,0,0,0,0,3,7,8,8,8);
+        do i.push(8,8,8,9,7,2,0,0,0,0,0,0,0,0,0,0);
+        do i.push(4,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2);
+        do i.push(2,3,3,3,1,0,0,0,0,0,0,0,0,0,1,5);
+        do i.push(7,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        do i.push(0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,10);
+
+        return i;
+    }
+}

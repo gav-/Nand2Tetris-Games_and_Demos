@@ -1,0 +1,8 @@
+Notes on PGM format for creating chunky bitmaps:
+
+- Load source image into gimp.
+- Desaturate to greyscale (choose method for best contrast).
+- Rescale image (output will be 4x larger due to b/w dither).
+- Adjust levels.
+- Posturize to 17 shades (equidistant shades for 4x4 dither matrix).
+- Save as pgm in ASCII format.

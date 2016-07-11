@@ -1,0 +1,328 @@
+function Dither4x4.init 1
+push static 6
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
+push constant 16
+push constant 4
+call Math.multiply 2
+pop static 5
+push constant 16
+push constant 4
+call Math.multiply 2
+push constant 17
+push constant 4
+call Math.multiply 2
+add
+push constant 16
+push constant 4
+call Math.multiply 2
+add
+pop static 4
+push static 4
+call Array.new 1
+pop static 0
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push static 5
+lt
+not
+if-goto WHILE_END0
+push local 0
+push static 0
+add
+push constant 15
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 16
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+call Dither4x4._setShade 5
+pop temp 0
+push constant 15
+push constant 1
+push constant 0
+push constant 0
+push constant 0
+call Dither4x4._setShade 5
+pop temp 0
+push constant 14
+push constant 1
+push constant 0
+push constant 4
+push constant 0
+call Dither4x4._setShade 5
+pop temp 0
+push constant 13
+push constant 5
+push constant 0
+push constant 4
+push constant 0
+call Dither4x4._setShade 5
+pop temp 0
+push constant 12
+push constant 5
+push constant 0
+push constant 5
+push constant 0
+call Dither4x4._setShade 5
+pop temp 0
+push constant 11
+push constant 5
+push constant 2
+push constant 5
+push constant 0
+call Dither4x4._setShade 5
+pop temp 0
+push constant 10
+push constant 5
+push constant 2
+push constant 5
+push constant 8
+call Dither4x4._setShade 5
+pop temp 0
+push constant 9
+push constant 5
+push constant 10
+push constant 5
+push constant 8
+call Dither4x4._setShade 5
+pop temp 0
+push constant 8
+push constant 5
+push constant 10
+push constant 5
+push constant 10
+call Dither4x4._setShade 5
+pop temp 0
+push constant 7
+push constant 7
+push constant 10
+push constant 5
+push constant 10
+call Dither4x4._setShade 5
+pop temp 0
+push constant 6
+push constant 7
+push constant 10
+push constant 13
+push constant 10
+call Dither4x4._setShade 5
+pop temp 0
+push constant 5
+push constant 15
+push constant 10
+push constant 13
+push constant 10
+call Dither4x4._setShade 5
+pop temp 0
+push constant 4
+push constant 15
+push constant 10
+push constant 15
+push constant 10
+call Dither4x4._setShade 5
+pop temp 0
+push constant 3
+push constant 15
+push constant 11
+push constant 15
+push constant 10
+call Dither4x4._setShade 5
+pop temp 0
+push constant 2
+push constant 15
+push constant 11
+push constant 15
+push constant 14
+call Dither4x4._setShade 5
+pop temp 0
+push constant 1
+push constant 15
+push constant 15
+push constant 15
+push constant 14
+call Dither4x4._setShade 5
+pop temp 0
+push constant 0
+push constant 15
+push constant 15
+push constant 15
+push constant 15
+call Dither4x4._setShade 5
+pop temp 0
+push constant 16
+call Dither4x4._getNewShiftedTable 1
+pop static 1
+push constant 256
+call Dither4x4._getNewShiftedTable 1
+pop static 2
+push constant 4096
+call Dither4x4._getNewShiftedTable 1
+pop static 3
+push constant 0
+not
+pop static 6
+push constant 0
+return
+function Dither4x4.dispose 0
+push static 6
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push static 0
+call Array.dispose 1
+pop temp 0
+push static 1
+call Array.dispose 1
+pop temp 0
+push static 2
+call Array.dispose 1
+pop temp 0
+push static 3
+call Array.dispose 1
+pop temp 0
+label IF_FALSE0
+push constant 0
+return
+function Dither4x4.getTable 0
+push argument 0
+push constant 0
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push static 0
+return
+label IF_FALSE0
+push argument 0
+push constant 1
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push static 1
+return
+label IF_FALSE1
+push argument 0
+push constant 2
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push static 2
+return
+label IF_FALSE2
+push argument 0
+push constant 3
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push static 3
+return
+label IF_FALSE3
+push static 0
+return
+function Dither4x4.getLength 0
+push static 4
+return
+function Dither4x4.getOffset 0
+push static 5
+return
+function Dither4x4._setShade 1
+push static 5
+push argument 0
+push constant 4
+call Math.multiply 2
+add
+pop local 0
+push local 0
+push static 0
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+push static 0
+add
+push argument 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 2
+add
+push static 0
+add
+push argument 3
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 3
+add
+push static 0
+add
+push argument 4
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function Dither4x4._getNewShiftedTable 3
+push static 4
+pop local 1
+push local 1
+call Array.new 1
+pop local 2
+label WHILE_EXP0
+push local 0
+push local 1
+lt
+not
+if-goto WHILE_END0
+push local 0
+push local 2
+add
+push local 0
+push static 0
+add
+pop pointer 1
+push that 0
+push argument 0
+call Math.multiply 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push local 2
+return

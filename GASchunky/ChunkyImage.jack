@@ -1,0 +1,376 @@
+/**
+ * ChunkyImage class.
+ *
+ * Basic bitmap concept based on original planer Image class.
+ *
+ * Version 1.0
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class ChunkyImage {
+    field int bitmapWidth;              // In pixels.
+    field int bitmapHeight;             // In rows.
+    field int bitmapLength;             // Size of bitmap array.      
+    field Array bitmap;                 // Raw, uncompressed bitmap data.
+    
+    field int pushIndex;                // Index of bitmap Array for pushing
+                                        // new words.
+                                         
+    field Array dither0, dither1, dither2, dither3;     // Four dither tables.
+    field int dthrPtr0, dthrPtr1, dthrPtr2, dthrPtr3;   // Offset into tables.
+                                        
+    /**
+     * Constructor
+     *  Allocates bitmap space.
+     */
+    constructor ChunkyImage newBitmap (int width, int height) {
+        var int i;
+        
+        do Dither4x4.init();
+        let dither0 = Dither4x4.getTable(0);
+        let dither1 = Dither4x4.getTable(1);
+        let dither2 = Dither4x4.getTable(2);
+        let dither3 = Dither4x4.getTable(3);
+        
+        let dthrPtr0 = dither0 + Dither4x4.getOffset();
+        let dthrPtr1 = dither1 + Dither4x4.getOffset();
+        let dthrPtr2 = dither2 + Dither4x4.getOffset();
+        let dthrPtr3 = dither3 + Dither4x4.getOffset();
+        
+        let bitmapWidth = width;
+        let bitmapHeight = height;
+        let bitmapLength = width * height;
+        let bitmap = Array.new(bitmapLength);
+        
+        do Sinus.init();
+        
+        return this;
+    }   
+    
+    /**
+     * Destructor
+     */
+    method void dispose ()  {
+        do bitmap.dispose();
+        do Memory.dealloc(this);
+        return;
+    }
+    
+    /** Bitmap getters. */
+    method Array getBitmap () { return bitmap; }
+    method ing getLength () { return bitmapLength; }
+    method int getWidth () { return bitmapWidth; }
+    method int getHeight () { return bitmapHeight; }
+    
+    /**
+     * Push 16 words at a time into bitmap. Because bitmap will be drawn
+     * with a chunky-to-planer 4x4 dither, each pixel value is multiplied by
+     * four to simplify lookup into dither table.
+     */
+    method void push (int a, int b, int c, int d, int e, int f, int g, int h,
+                      int i, int j, int k, int l, int m, int n, int o, int p) {
+                      
+        var int remain;
+        let remain = bitmapLength - pushIndex;
+        
+        if (remain = 0) {                   // Why were we called ?
+            return;
+        }
+        
+        if (remain > 15) {                  // Using all 16 parameters.
+            let bitmap[pushIndex] = a * 4;
+            let bitmap[pushIndex +  1] = b * 4;
+            let bitmap[pushIndex +  2] = c * 4;
+            let bitmap[pushIndex +  3] = d * 4;
+            let bitmap[pushIndex +  4] = e * 4;
+            let bitmap[pushIndex +  5] = f * 4;
+            let bitmap[pushIndex +  6] = g * 4;
+            let bitmap[pushIndex +  7] = h * 4;
+            let bitmap[pushIndex +  8] = i * 4;
+            let bitmap[pushIndex +  9] = j * 4;
+            let bitmap[pushIndex + 10] = k * 4;
+            let bitmap[pushIndex + 11] = l * 4;
+            let bitmap[pushIndex + 12] = m * 4;
+            let bitmap[pushIndex + 13] = n * 4;
+            let bitmap[pushIndex + 14] = o * 4;
+            let bitmap[pushIndex + 15] = p * 4;
+            let pushIndex = pushIndex + 16;
+        } else {                            // Using 15 or less parameters.
+            let bitmap[pushIndex] = a * 4;
+            if (remain >  1) { let bitmap[pushIndex +  1] = b * 4; }
+            if (remain >  2) { let bitmap[pushIndex +  2] = c * 4; }
+            if (remain >  3) { let bitmap[pushIndex +  3] = d * 4; }
+            if (remain >  4) { let bitmap[pushIndex +  4] = e * 4; }
+            if (remain >  5) { let bitmap[pushIndex +  5] = f * 4; }
+            if (remain >  6) { let bitmap[pushIndex +  6] = g * 4; }
+            if (remain >  7) { let bitmap[pushIndex +  7] = h * 4; }
+            if (remain >  8) { let bitmap[pushIndex +  8] = i * 4; }
+            if (remain >  9) { let bitmap[pushIndex +  9] = j * 4; }
+            if (remain > 10) { let bitmap[pushIndex + 10] = k * 4; }
+            if (remain > 11) { let bitmap[pushIndex + 11] = l * 4; }
+            if (remain > 12) { let bitmap[pushIndex + 12] = m * 4; }
+            if (remain > 13) { let bitmap[pushIndex + 13] = n * 4; }
+            if (remain > 14) { let bitmap[pushIndex + 14] = o * 4; }
+            let pushIndex = bitmapLength;           
+        }
+        
+        return;
+    }
+    
+    /**
+     * Set the offset into the dither tables. This is used to darken or
+     * lighten shades, usefull for fading to black or white.
+     *
+     * @param int offset
+     *  Range 0 (full black) to 32 (full white).
+     *  Normal shade range begins at 16.
+     */
+    method void setShadeOffset (int offset) {
+        if ( (offset < 0) | (offset > 32) ) {       // Check offset is in range.
+            return;
+        }
+        let dthrPtr0 = dither0 + (offset * 4);
+        let dthrPtr1 = dither1 + (offset * 4);
+        let dthrPtr2 = dither2 + (offset * 4);
+        let dthrPtr3 = dither3 + (offset * 4);
+        
+        return;
+    }
+       
+    /**
+     * Draw bitmap to screen.
+     *
+     * High speed, no bounds checking or clipping.
+     *
+     * @param int x 
+     *  In words (there are 512/16 == 32 words across screen).
+     * @parm int y
+     *  In rows (there are 256 rows down screen).
+     */
+    method void draw (int x, int y) {
+        var int u, v;
+        var int p0, p1, p2, p3;
+        var int scrnRowPtr, scrnPtr, bitmapPtr;
+        
+        // 16384 == Screen memory address.
+        // 32 == stride (screen width in words) 512 pixels / 16bit words.
+        let scrnRowPtr = 16384 + x + (y * 32);  
+        
+        // Set pointer to start of bitmap
+        let bitmapPtr = bitmap;
+
+        // Draw bitmap 4 pixels at a time, expanded to 4x4 via dither pattern.     
+        while (v < bitmapHeight) {   
+            let u = 0;   
+            let scrnPtr = scrnRowPtr;               // Position for this row.           
+            while (u < bitmapWidth) {
+                let p0 = bitmapPtr[u    ];          // Source pixel 0
+                let p1 = bitmapPtr[u + 1];          // Source pixel 1
+                let p2 = bitmapPtr[u + 2];          // Source pixel 2
+                let p3 = bitmapPtr[u + 3];          // Source pixel 3
+                
+                // Combine 4 source pixels into 4 vertical screen words by
+                // looking up source pixel values in dither matrix.
+                let scrnPtr[ 0] = dthrPtr0[p0    ] | dthrPtr1[p1    ] | dthrPtr2[p2    ] | dthrPtr3[p3    ];
+                let scrnPtr[32] = dthrPtr0[p0 + 1] | dthrPtr1[p1 + 1] | dthrPtr2[p2 + 1] | dthrPtr3[p3 + 1];
+                let scrnPtr[64] = dthrPtr0[p0 + 2] | dthrPtr1[p1 + 2] | dthrPtr2[p2 + 2] | dthrPtr3[p3 + 2];
+                let scrnPtr[96] = dthrPtr0[p0 + 3] | dthrPtr1[p1 + 3] | dthrPtr2[p2 + 3] | dthrPtr3[p3 + 3];
+                
+                let scrnPtr = scrnPtr + 1;          // Next screen word in row.
+                let u = u + 4;                      // Next 4 pixels in source.
+            }
+            let bitmapPtr = bitmapPtr + bitmapWidth;
+            let scrnRowPtr = scrnRowPtr + 128;      // Skip 4 screen rows.
+            let v = v + 1;    
+        }
+        
+        return;
+    }
+    
+    /**
+     * Draw bitmap to screen with x offset.
+     *
+     * High speed, no bounds checking or clipping.
+     *
+     * @param int x 
+     *  In words (there are 512/16 == 32 words across screen).
+     * @param int o
+     *  X offset in pixels from 0 to 3.
+     * @parm int y
+     *  In rows (there are 256 rows down screen).
+     */
+    method void drawOffset (int x, int o, int y) {
+        var int u, v, uTerm;
+        var int p0, p1, p2, p3;
+        var int w0, w1, w2, w3;
+        var int scrnRowPtr, scrnPtr, bitmapPtr;
+        
+        // 16384 == Screen memory address.
+        // 32 == stride (screen width in words) 512 pixels / 16bit words.
+        let scrnRowPtr = 16384 + x + (y * 32);  
+        
+        // Set pointer to start of bitmap
+        let bitmapPtr = bitmap; 
+        
+        // Need to terminate u iteration before last o pixels.
+        let uTerm = bitmapWidth - o;
+
+        // Draw bitmap 4 pixels at a time, expanded to 4x4 via dither pattern.     
+        while (v < bitmapHeight) {   
+            let u = 0;   
+            let scrnPtr = scrnRowPtr;               // Position for this row.
+                        
+            // Handle first column offset.
+            if (o > 0) {
+                let p0 = 64;                        // Clear first pixel
+                let p1 = bitmapPtr[u    ];          // Source pixel 0
+                let p2 = bitmapPtr[u + 1];          // Source pixel 1
+                let p3 = bitmapPtr[u + 2];          // Source pixel 2
+                if (o > 1) {                        // Shuffle across 1 pixel.
+                    let p3 = p2; let p2 = p1; let p1 = 64;
+                    if (o > 2) {                    // Shuffle across 1 pixel.
+                        let p3 = p2; let p2 = 64;
+                    }
+                }
+                let scrnPtr[ 0] = dthrPtr0[p0    ] | dthrPtr1[p1    ] | dthrPtr2[p2    ] | dthrPtr3[p3    ];
+                let scrnPtr[32] = dthrPtr0[p0 + 1] | dthrPtr1[p1 + 1] | dthrPtr2[p2 + 1] | dthrPtr3[p3 + 1];
+                let scrnPtr[64] = dthrPtr0[p0 + 2] | dthrPtr1[p1 + 2] | dthrPtr2[p2 + 2] | dthrPtr3[p3 + 2];
+                let scrnPtr[96] = dthrPtr0[p0 + 3] | dthrPtr1[p1 + 3] | dthrPtr2[p2 + 3] | dthrPtr3[p3 + 3];
+                let scrnPtr = scrnPtr + 1; 
+                let u = u + 4 - o;                  // Adjust u for offset.
+            }
+            
+            // Handle bulk of image.
+            while (u < uTerm) {
+                let p0 = bitmapPtr[u    ];          // Source pixel 0
+                let p1 = bitmapPtr[u + 1];          // Source pixel 1
+                let p2 = bitmapPtr[u + 2];          // Source pixel 2
+                let p3 = bitmapPtr[u + 3];          // Source pixel 3
+                
+                // Combine 4 source pixels into 4 vertical screen words by
+                // looking up source pixel values in dither matrix.
+                let scrnPtr[ 0] = dthrPtr0[p0    ] | dthrPtr1[p1    ] | dthrPtr2[p2    ] | dthrPtr3[p3    ];
+                let scrnPtr[32] = dthrPtr0[p0 + 1] | dthrPtr1[p1 + 1] | dthrPtr2[p2 + 1] | dthrPtr3[p3 + 1];
+                let scrnPtr[64] = dthrPtr0[p0 + 2] | dthrPtr1[p1 + 2] | dthrPtr2[p2 + 2] | dthrPtr3[p3 + 2];
+                let scrnPtr[96] = dthrPtr0[p0 + 3] | dthrPtr1[p1 + 3] | dthrPtr2[p2 + 3] | dthrPtr3[p3 + 3];
+                
+                let scrnPtr = scrnPtr + 1;          // Next screen word in row.
+                let u = u + 4;                      // Next 4 pixels in source.
+            }
+            
+            // Handle last column offset.
+            if (o > 0) {
+                let p3 = 64;                        // Always clear.
+                let p2 = 64;                        // May be clear.
+                let p1 = 64;                        // May be clear.
+                let p0 = bitmapPtr[u    ];          // Source pixel 0
+                if (o > 1) {
+                    let p1 = bitmapPtr[u + 1];      // Source pixel 1
+                    if (o > 2) {
+                        let p2 = bitmapPtr[u + 2];  // Source pixel 2
+                    }
+                }
+                let scrnPtr[ 0] = dthrPtr0[p0    ] | dthrPtr1[p1    ] | dthrPtr2[p2    ] | dthrPtr3[p3    ];
+                let scrnPtr[32] = dthrPtr0[p0 + 1] | dthrPtr1[p1 + 1] | dthrPtr2[p2 + 1] | dthrPtr3[p3 + 1];
+                let scrnPtr[64] = dthrPtr0[p0 + 2] | dthrPtr1[p1 + 2] | dthrPtr2[p2 + 2] | dthrPtr3[p3 + 2];
+                let scrnPtr[96] = dthrPtr0[p0 + 3] | dthrPtr1[p1 + 3] | dthrPtr2[p2 + 3] | dthrPtr3[p3 + 3];
+            }    
+                       
+            let bitmapPtr = bitmapPtr + bitmapWidth;
+            let scrnRowPtr = scrnRowPtr + 128;      // Skip 4 screen rows.
+            let v = v + 1;    
+        }
+               
+        return;
+    }
+    
+    /**
+     * drawTile - Blit chunky bitmap to screen at x,y position, tiling to
+     *            fill w,h. Start tiling at u,v offset into bitmap.
+     *
+     * Bitmap must be a power of 2 in width and height, with a minimum width
+     * of 4.
+     */
+    method void drawTile (int x, int y, int w, int h, int u, int v) {
+        var int i, j;                           // Screen coordinates.
+        var int scrnRowPtr;                     // Screen current row pointer.
+        var int scrnPtr;                        // Screen pointer.
+        var int tu, tv;                         // Texture u,v
+        var int tuMask, tvMask;                 // Masks to modulo tu, tv.
+        var int p0, p1, p2, p3;                 // Texels to render.
+        var int bitmapRowPtr;                   // Bitmap current row pointer.
+        var int bitmapPtr;                      // Bitmap pinter.
+        
+        let scrnRowPtr = 16384 + x + (y * 32);  // Start of render area.
+        
+        // Set pointer to offset in bitmap
+        //let bitmapPtr = bitmap + u + (v * bitmapWidth);
+        
+        let tuMask = bitmapWidth - 1;           // e.g. 32 - 1 = 0001 1111
+        let tvMask = bitmapHeight - 1;
+        
+        // Use inverted logic, iterate through screen area and index into
+        // bitmap as a texture.
+        let tu = u;                             // Starting positions.
+        let tv = v;
+        let j = 0;
+        while (j < h) {
+            let scrnPtr = scrnRowPtr;           // Position for this row.
+            let tu = u;           
+            //let bitmapRowPtr = bitmap + ((tv & tvMask) * bitmapWidth);
+            let bitmapPtr = bitmap + ((tv & tvMask) * bitmapWidth);
+            let i = 0;           
+            while (i < w) {
+                //let bitmapPtr = bitmap + (tu & tuMask) + ((tv & tvMask) * bitmapWidth);
+                /*
+                let bitmapPtr = bitmapRowPtr + (tu & tuMask);
+                let p0 = bitmapPtr[0];  // Source texel 0
+                let p1 = bitmapPtr[1];  // Source texel 1
+                let p2 = bitmapPtr[2];  // Source texel 2
+                let p3 = bitmapPtr[3];  // Source texel 3
+                */
+                let p0 = bitmapPtr[ tu      & tuMask];  // Source texel 0
+                let p1 = bitmapPtr[(tu + 1) & tuMask];  // Source texel 1
+                let p2 = bitmapPtr[(tu + 2) & tuMask];  // Source texel 2
+                let p3 = bitmapPtr[(tu + 3) & tuMask];  // Source texel 3
+                
+                // Combine 4 texels into 4 vertical screen words by
+                // looking up texel values in dither matrix.
+                let scrnPtr[ 0] = dthrPtr0[p0    ] | dthrPtr1[p1    ] | dthrPtr2[p2    ] | dthrPtr3[p3    ];
+                let scrnPtr[32] = dthrPtr0[p0 + 1] | dthrPtr1[p1 + 1] | dthrPtr2[p2 + 1] | dthrPtr3[p3 + 1];
+                let scrnPtr[64] = dthrPtr0[p0 + 2] | dthrPtr1[p1 + 2] | dthrPtr2[p2 + 2] | dthrPtr3[p3 + 2];
+                let scrnPtr[96] = dthrPtr0[p0 + 3] | dthrPtr1[p1 + 3] | dthrPtr2[p2 + 3] | dthrPtr3[p3 + 3];
+                                            
+                let tu = tu + 4;                // Next four texels.
+                let scrnPtr = scrnPtr + 1;      // Next screen word in row.
+                let i = i + 1;                  // Next screen word.
+            }
+            let tv = tv + 1;                    // Next texture row.
+            let scrnRowPtr = scrnRowPtr + 128;  // Skip 4 screen rows.
+            let j = j + 4;                      // Skip 4 screen rows.
+        }
+        
+        return;
+    }
+    
+
+}

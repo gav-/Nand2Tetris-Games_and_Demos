@@ -1,0 +1,241 @@
+/**
+ * Plasma render class.
+ *
+ * Version 1.0
+ *
+ * Reference:
+ * http://hugi.scene.org/online/hugi24/coding%20graphics%20bonz%20sines%20and%20cosines%20for%20fun%20and%20profit.htm
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class Plasma {
+    field int scrnStartPtr, width, height;// Plasma screen pos and dimensions.
+    field Array sinus;
+    field Array d0, d1, d2, d3;         // Dither arrays.
+    field int shadeOffset;              // Offset of pointers into dither arrays.
+    field int dP0, dP1, dP2, dP3;       // Pointer offsets into dither arrays.
+    
+    field int pA, pB, pC, pD, pE, pF, pG, pH, pI, pJ, pK, pL;  // fn parameters.
+    field int time1, time2, time3, time4;   // Plasma state variables.
+    
+    /**
+     * Plasma constructor.
+     *
+     * x, y, w, h are in screen space (x and w in words).
+     */
+    constructor Plasma new (int x, int y, int w, int h) {
+        var int i;
+                
+        do Sinus.init();
+        let sinus = Sinus.resample(0, 360, 256);
+        
+        // Rescale sinus from range: -100 to 100
+        //                 to range: 4 to 132 ( (4 * 132) / 32  = 16).
+        // - We need a scale of 0 to 16 when 4 sinus lookups are added and then 
+        //   divided by 32.
+        // - The choice of multiplying by 163 and then dividing by 255 is to 
+        //   minimise quantization errors while remaining < 2^15:
+        //   (100 + 100) * 163 = 32600
+        //   32600 / 255 = 128 (actually 127.84, which we make up in rounding).
+        // - To even out rounding, we add an offset of 127 when scaling here.
+        // - To even out final rounding when dividing by 32 later, we add 
+        //   a final 4 (~ half of 32/4). 
+        // - Table verified by printing, ensuring an even number of min and
+        //   max values.
+        // - Verified visually when setting plasma parameters to the most 
+        //   basic: 1,1,1,1, 1,1,1,1, 0,0,0,0
+        while (i < 256) {            
+            let sinus[i] = ((((100 + sinus[i]) * 163) + 127) / 255) + 4;
+            //do Output.printInt(sinus[i]);
+            //do Output.printString(",");
+            let i = i + 1;
+        }
+        //do Sys.halt();
+        
+        do Dither4x4.init();
+        let d0 = Dither4x4.getTable(0);
+        let d1 = Dither4x4.getTable(1);
+        let d2 = Dither4x4.getTable(2);
+        let d3 = Dither4x4.getTable(3);
+        
+        let shadeOffset = Dither4x4.getOffset();
+        let dP0 = d0 + shadeOffset;
+        let dP1 = d1 + shadeOffset;
+        let dP2 = d2 + shadeOffset;
+        let dP3 = d3 + shadeOffset;
+        
+        // Set screen position and dimensions.
+        do setPosition(x, y, w, h);
+        
+        // Initial parameters to some low integer values.
+        do setParameters(2, 3, 2, 5,
+                5, -3, -2, 5,
+                5, 8, -3, 12);
+        
+        return this;
+    }
+    
+    /**
+     * Destructor
+     */
+    method void dispose ()  {
+        do sinus.dispose();
+        do Memory.dealloc(this);
+        return;
+    }
+    
+    /**
+     * Set/Reset plasma screen location and dimensions.
+     *
+     * @param int x
+     *  X dimension in screen words.
+     * @param int y
+     *  Y dimension in screen rows.
+     * @param int w
+     *  Width in screen words.
+     * @param int h
+     *  Height in screen words.
+     */
+    method void setPosition (int x, int y, int w, int h) {
+        let scrnStartPtr = 16384 + x + (y * 32);  // Start of render area.
+        let width = w;
+        let height = h;
+        return;
+    }
+    
+    /**
+     * Set the plasma function parameters. Low integer values with differing 
+     * values that affect the same variable (x, y or t) are good.
+     *
+     * cosTable [(a x + b t + c) & 255] + 
+     * cosTable [(d x + e t + f) & 255] +
+     * cosTable [(g y + h t + i) & 255] +
+     * cosTable [(j y + k t + l) & 255]
+     */ 
+    method void setParameters (int iA, int iD, int iG, int iJ,
+                      int iB, int iE, int iH, int iK, 
+                      int iC, int iF, int iI, int iL) {
+        let pA = iA;
+        let pD = iD;
+        let pG = iG;
+        let pJ = iJ;
+        
+        let pB = iB;
+        let pE = iE;
+        let pH = iH;
+        let pK = iK;
+        
+        let pC = iC;
+        let pF = iF;
+        let pI = iI;
+        let pL = iL;
+        
+        let time1 = pC;
+        let time2 = pF;
+        let time3 = pI;
+        let time4 = pL;
+        
+        return;
+    }
+    
+    /**
+     * Set the offset into the dither tables. This is used to darken or
+     * lighten shades, usefull for fading to black or white.
+     *
+     * @param int offset
+     *  Range 0 (full black) to 32 (full white).
+     *  Normal shade range begins at 16.
+     */
+    method void setShadeOffset (int offset) {
+        if ( (offset < 0) | (offset > 32) ) {       // Check offset is in range.
+            return;
+        }
+        let dP0 = d0 + (offset * 4);
+        let dP1 = d1 + (offset * 4);
+        let dP2 = d2 + (offset * 4);
+        let dP3 = d3 + (offset * 4);
+        
+        return;
+    }
+    /**
+     * drawFrame
+     */
+    method void drawFrame () {     
+        var int i, j;
+        var int angle1, angle2, angle3, angle4;
+        var int p0, p1, p2, p3;
+        var int scrnColPtr, scrnRowPtr;
+               
+        let angle3 = time3;
+        let angle4 = time4;
+        let scrnRowPtr = scrnStartPtr;
+        let j = 0;
+        while (j < height) {
+            let scrnColPtr = scrnRowPtr;
+            let angle1 = time1;
+            let angle2 = time2;
+            let i = 0;
+            while (i < width) {
+                // We are summing four sinus table lookups in the range of
+                // 4 to 132. When divided by 32, the range quantises down to
+                // become 0 to 16. The final value is multiplied by 4 for
+                // lookup into dither tables where the 17 shade values are
+                // offset by 4.  
+                let p0 = ((sinus[angle1 & 255] + sinus[angle2 & 255] + sinus[angle3 & 255] + sinus[angle4 & 255]) / 32) * 4;
+                let angle1 = angle1 + pA;
+                let angle2 = angle2 + pD;
+                let p1 = ((sinus[angle1 & 255] + sinus[angle2 & 255] + sinus[angle3 & 255] + sinus[angle4 & 255]) / 32) * 4;
+                let angle1 = angle1 + pA;
+                let angle2 = angle2 + pD;
+                let p2 = ((sinus[angle1 & 255] + sinus[angle2 & 255] + sinus[angle3 & 255] + sinus[angle4 & 255]) / 32) * 4;
+                let angle1 = angle1 + pA;
+                let angle2 = angle2 + pD;
+                let p3 = ((sinus[angle1 & 255] + sinus[angle2 & 255] + sinus[angle3 & 255] + sinus[angle4 & 255]) / 32) * 4;
+                let angle1 = angle1 + pA;
+                let angle2 = angle2 + pD;
+                
+                // Combine 4 texels into 4 vertical screen words by
+                // looking up texel values in dither matrix.
+                let scrnColPtr[ 0] = dP0[p0    ] | dP1[p1    ] | dP2[p2    ] | dP3[p3    ];
+                let scrnColPtr[32] = dP0[p0 + 1] | dP1[p1 + 1] | dP2[p2 + 1] | dP3[p3 + 1];
+                let scrnColPtr[64] = dP0[p0 + 2] | dP1[p1 + 2] | dP2[p2 + 2] | dP3[p3 + 2];
+                let scrnColPtr[96] = dP0[p0 + 3] | dP1[p1 + 3] | dP2[p2 + 3] | dP3[p3 + 3];
+            
+                let scrnColPtr = scrnColPtr + 1;      // Next screen word in row.
+                let i = i + 1;
+            }
+            
+            let angle3 = angle3 + pG;
+            let angle4 = angle4 + pJ;
+            let scrnRowPtr = scrnRowPtr + 128;  // Skip 4 screen rows.               
+            let j = j + 4;
+        }
+        
+        let time1 = time1 + pB;
+        let time2 = time2 + pE;
+        let time3 = time3 + pH;
+        let time4 = time4 + pK;
+            
+        return;
+    }
+    
+}

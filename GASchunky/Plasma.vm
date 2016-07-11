@@ -1,0 +1,608 @@
+function Plasma.new 1
+push constant 29
+call Memory.alloc 1
+pop pointer 0
+call Sinus.init 0
+pop temp 0
+push constant 0
+push constant 360
+push constant 256
+call Sinus.resample 3
+pop this 3
+label WHILE_EXP0
+push local 0
+push constant 256
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 3
+add
+push constant 100
+push local 0
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push constant 163
+call Math.multiply 2
+push constant 127
+add
+push constant 255
+call Math.divide 2
+push constant 4
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+call Dither4x4.init 0
+pop temp 0
+push constant 0
+call Dither4x4.getTable 1
+pop this 4
+push constant 1
+call Dither4x4.getTable 1
+pop this 5
+push constant 2
+call Dither4x4.getTable 1
+pop this 6
+push constant 3
+call Dither4x4.getTable 1
+pop this 7
+call Dither4x4.getOffset 0
+pop this 8
+push this 4
+push this 8
+add
+pop this 9
+push this 5
+push this 8
+add
+pop this 10
+push this 6
+push this 8
+add
+pop this 11
+push this 7
+push this 8
+add
+pop this 12
+push pointer 0
+push argument 0
+push argument 1
+push argument 2
+push argument 3
+call Plasma.setPosition 5
+pop temp 0
+push pointer 0
+push constant 2
+push constant 3
+push constant 2
+push constant 5
+push constant 5
+push constant 3
+neg
+push constant 2
+neg
+push constant 5
+push constant 5
+push constant 8
+push constant 3
+neg
+push constant 12
+call Plasma.setParameters 13
+pop temp 0
+push pointer 0
+return
+function Plasma.dispose 0
+push argument 0
+pop pointer 0
+push this 3
+call Array.dispose 1
+pop temp 0
+push pointer 0
+call Memory.dealloc 1
+pop temp 0
+push constant 0
+return
+function Plasma.setPosition 0
+push argument 0
+pop pointer 0
+push constant 16384
+push argument 1
+add
+push argument 2
+push constant 32
+call Math.multiply 2
+add
+pop this 0
+push argument 3
+pop this 1
+push argument 4
+pop this 2
+push constant 0
+return
+function Plasma.setParameters 0
+push argument 0
+pop pointer 0
+push argument 1
+pop this 13
+push argument 2
+pop this 16
+push argument 3
+pop this 19
+push argument 4
+pop this 22
+push argument 5
+pop this 14
+push argument 6
+pop this 17
+push argument 7
+pop this 20
+push argument 8
+pop this 23
+push argument 9
+pop this 15
+push argument 10
+pop this 18
+push argument 11
+pop this 21
+push argument 12
+pop this 24
+push this 15
+pop this 25
+push this 18
+pop this 26
+push this 21
+pop this 27
+push this 24
+pop this 28
+push constant 0
+return
+function Plasma.setShadeOffset 0
+push argument 0
+pop pointer 0
+push argument 1
+push constant 0
+lt
+push argument 1
+push constant 32
+gt
+or
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
+push this 4
+push argument 1
+push constant 4
+call Math.multiply 2
+add
+pop this 9
+push this 5
+push argument 1
+push constant 4
+call Math.multiply 2
+add
+pop this 10
+push this 6
+push argument 1
+push constant 4
+call Math.multiply 2
+add
+pop this 11
+push this 7
+push argument 1
+push constant 4
+call Math.multiply 2
+add
+pop this 12
+push constant 0
+return
+function Plasma.drawFrame 12
+push argument 0
+pop pointer 0
+push this 27
+pop local 4
+push this 28
+pop local 5
+push this 0
+pop local 11
+push constant 0
+pop local 1
+label WHILE_EXP0
+push local 1
+push this 2
+lt
+not
+if-goto WHILE_END0
+push local 11
+pop local 10
+push this 25
+pop local 2
+push this 26
+pop local 3
+push constant 0
+pop local 0
+label WHILE_EXP1
+push local 0
+push this 1
+lt
+not
+if-goto WHILE_END1
+push local 2
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+push local 3
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push local 4
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push local 5
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push constant 32
+call Math.divide 2
+push constant 4
+call Math.multiply 2
+pop local 6
+push local 2
+push this 13
+add
+pop local 2
+push local 3
+push this 16
+add
+pop local 3
+push local 2
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+push local 3
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push local 4
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push local 5
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push constant 32
+call Math.divide 2
+push constant 4
+call Math.multiply 2
+pop local 7
+push local 2
+push this 13
+add
+pop local 2
+push local 3
+push this 16
+add
+pop local 3
+push local 2
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+push local 3
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push local 4
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push local 5
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push constant 32
+call Math.divide 2
+push constant 4
+call Math.multiply 2
+pop local 8
+push local 2
+push this 13
+add
+pop local 2
+push local 3
+push this 16
+add
+pop local 3
+push local 2
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+push local 3
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push local 4
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push local 5
+push constant 255
+and
+push this 3
+add
+pop pointer 1
+push that 0
+add
+push constant 32
+call Math.divide 2
+push constant 4
+call Math.multiply 2
+pop local 9
+push local 2
+push this 13
+add
+pop local 2
+push local 3
+push this 16
+add
+pop local 3
+push constant 0
+push local 10
+add
+push local 6
+push this 9
+add
+pop pointer 1
+push that 0
+push local 7
+push this 10
+add
+pop pointer 1
+push that 0
+or
+push local 8
+push this 11
+add
+pop pointer 1
+push that 0
+or
+push local 9
+push this 12
+add
+pop pointer 1
+push that 0
+or
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 32
+push local 10
+add
+push local 6
+push constant 1
+add
+push this 9
+add
+pop pointer 1
+push that 0
+push local 7
+push constant 1
+add
+push this 10
+add
+pop pointer 1
+push that 0
+or
+push local 8
+push constant 1
+add
+push this 11
+add
+pop pointer 1
+push that 0
+or
+push local 9
+push constant 1
+add
+push this 12
+add
+pop pointer 1
+push that 0
+or
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 64
+push local 10
+add
+push local 6
+push constant 2
+add
+push this 9
+add
+pop pointer 1
+push that 0
+push local 7
+push constant 2
+add
+push this 10
+add
+pop pointer 1
+push that 0
+or
+push local 8
+push constant 2
+add
+push this 11
+add
+pop pointer 1
+push that 0
+or
+push local 9
+push constant 2
+add
+push this 12
+add
+pop pointer 1
+push that 0
+or
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 96
+push local 10
+add
+push local 6
+push constant 3
+add
+push this 9
+add
+pop pointer 1
+push that 0
+push local 7
+push constant 3
+add
+push this 10
+add
+pop pointer 1
+push that 0
+or
+push local 8
+push constant 3
+add
+push this 11
+add
+pop pointer 1
+push that 0
+or
+push local 9
+push constant 3
+add
+push this 12
+add
+pop pointer 1
+push that 0
+or
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 10
+push constant 1
+add
+pop local 10
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP1
+label WHILE_END1
+push local 4
+push this 19
+add
+pop local 4
+push local 5
+push this 22
+add
+pop local 5
+push local 11
+push constant 128
+add
+pop local 11
+push local 1
+push constant 4
+add
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
+push this 25
+push this 14
+add
+pop this 25
+push this 26
+push this 17
+add
+pop this 26
+push this 27
+push this 20
+add
+pop this 27
+push this 28
+push this 23
+add
+pop this 28
+push constant 0
+return

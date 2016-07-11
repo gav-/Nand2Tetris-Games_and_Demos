@@ -1,0 +1,309 @@
+/**
+ * RotoZoom class, requires a ChunkyImage.
+ *
+ * Vesion 1.0
+ *
+ * References:
+ *  More Tricks of the Game-Programming Gurus. ISBN-13: 978-0672306976
+ *  http://www.flipcode.com/archives/The_Art_of_Demomaking-Issue_10_Roto-Zooming.shtml
+ *  http://petesqbsite.com/sections/tutorials/tuts/qbrotate.html
+ *  http://hugi.scene.org/online/hugi24/coding%20graphics%20bonz%20sines%20and%20cosines%20for%20fun%20and%20profit.htm
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class RotoZoom {
+    field ChunkyImage image;
+    
+    field Array bitmap;
+    field int bitmapWidth;              // In pixels.
+    field int bitmapHeight;             // In rows.
+    
+    field Array sinus;
+    
+    field int scrnStartPtr, width, height;// Render screen pos and dimensions.
+    
+    field int tuMask, tvMask;             // Masks to modulo texture UV.
+    
+    field Array d0, d1, d2, d3;         // Dither arrays.
+    field int shadeOffset;              // Offset of pointers into dither arrays.
+    field int dP0, dP1, dP2, dP3;       // Pointer offsets into dither arrays.
+
+    /**
+     * RotoZoom constructor.
+     *
+     * x, y, w, h are in screen space (x and w in words).
+     */
+    constructor RotoZoom new (ChunkyImage c, int x, int y, int w, int h) {
+        
+        do Sinus.init();
+        let sinus = Sinus.resample(0, 360, 256);
+        
+        do Dither4x4.init();
+        let d0 = Dither4x4.getTable(0);
+        let d1 = Dither4x4.getTable(1);
+        let d2 = Dither4x4.getTable(2);
+        let d3 = Dither4x4.getTable(3);
+        
+        let shadeOffset = Dither4x4.getOffset();
+        let dP0 = d0 + shadeOffset;
+        let dP1 = d1 + shadeOffset;
+        let dP2 = d2 + shadeOffset;
+        let dP3 = d3 + shadeOffset;
+        
+        do reset(c, x, y, w, h);
+        
+        return this;
+    }
+    
+    /**
+     * Destructor
+     */
+    method void dispose ()  {
+        do Memory.dealloc(this);
+        return;
+    }
+    
+    /**
+     * Reset RotoZoom for new image, screen position and dimensions.
+     */
+    method void reset (ChunkyImage c, int x, int y, int w, int h) {
+        let image = c;
+        let bitmap = image.getBitmap();
+        let bitmapWidth = image.getWidth();
+        let bitmapHeight = image.getHeight();
+        
+        let scrnStartPtr = 16384 + x + (y * 32);  // Start of render area.
+        let width = w;
+        let height = h;
+        
+        let tuMask = bitmapWidth - 1;           // e.g. 32 - 1 = 0001 1111
+        let tvMask = bitmapHeight - 1;
+        
+        return;
+    }
+
+    /**
+     * Set the offset into the dither tables. This is used to darken or
+     * lighten shades, usefull for fading to black or white.
+     *
+     * @param int offset
+     *  Range 0 (full black) to 32 (full white).
+     *  Normal shade range begins at 16.
+     */
+    method void setShadeOffset (int offset) {
+        if ( (offset < 0) | (offset > 32) ) {       // Check offset is in range.
+            return;
+        }
+        let dP0 = d0 + (offset * 4);
+        let dP1 = d1 + (offset * 4);
+        let dP2 = d2 + (offset * 4);
+        let dP3 = d3 + (offset * 4);
+        
+        return;
+    }
+    
+    
+    /**
+     * drawFrame - Blit chunky bitmap to screen position, rotated,
+     *                zoomed and tiled to fill width and height.
+     *
+     * Bitmap must be a power of 2 in width and height, with a minimum width
+     * of 4.
+     * 
+     * @param int u Offset into texture to begin at.
+     * @param int v Offset into texture to begin at.
+     * @param int a Rotation angle of texture in degrees.
+     * @param int z Zoom/Scale percentage of texture (10% to 327%),
+     *              Value appears inversed: zoom < 100% < shrink.
+     *
+     * @return Nothing, except a gorgeously rotozoomed image on the screen.
+     */
+    method void drawFrame (int u, int v, int a, int z) {
+        var int scrnRowPtr;                     // Screen current row pointer.
+        var int scrnRowPtrEnd;
+        var int scrnColPtr;                     // Screen current col pointer.
+        var int scrnColPtrEnd;
+        var int tu, tv;                         // Texture u,v
+
+        var int p0, p1, p2, p3;                 // Texels to render.
+        
+        var int rowU, rowV;
+        var int duRow, dvRow;
+        var int duCol, dvCol, duColx2, dvColx2, duColx3, dvColx3, duColx4, dvColx4;
+        
+        // Calculate deltas
+        let duCol = (sinus[(a + 63) & 255] * z) / 100;  // +90degrees == cos
+        let dvCol = (sinus[a & 255] * z) / 100;         //            == sin
+        
+        let duColx2 = duCol + duCol;
+        let dvColx2 = dvCol + dvCol;
+        
+        let duColx3 = duColx2 + duCol;
+        let dvColx3 = dvColx2 + dvCol;
+        
+        let duColx4 = duColx3 + duCol;
+        let dvColx4 = dvColx3 + dvCol;
+        
+        let duRow = -dvCol;
+        let dvRow = duCol;
+        
+        // Centre rotation in screen window by offsetting texture U/V.
+        // Half of screen width in texture space is: w * 4 / 2
+        //  (Screen width is 4:1, 4 texels per word.)
+        // Half of screen height in texture space is: h / 4 / 2
+        //  (Screen height is 1:4, 4 rows per texel.)
+        let rowU = (u * 100) - ((width * 2) * duCol) - ((height / 8) * duRow);
+        let rowV = (v * 100) - ((width * 2) * dvCol) - ((height / 8) * dvRow);
+        //let rowU = (u * 100);
+        //let rowV = (v * 100);
+        
+        // Use inverted logic, iterate through screen area and index into
+        // bitmap as a texture.
+        let scrnRowPtr = scrnStartPtr;
+        let scrnRowPtrEnd = scrnRowPtr + (height * 32);
+        while (scrnRowPtr < scrnRowPtrEnd) {           
+            let tu = rowU;
+            let tv = rowV;      
+              
+            let scrnColPtr = scrnRowPtr;
+            let scrnColPtrEnd = scrnColPtr + width;         
+            while (scrnColPtr < scrnColPtrEnd) {
+            
+                let p0 = bitmap[(((tu          )/ 100) & tuMask) + ((((tv          )/ 100) & tvMask) * bitmapWidth)];  // Source texel 0
+                let p1 = bitmap[(((tu + duCol  )/ 100) & tuMask) + ((((tv + dvCol  )/ 100) & tvMask) * bitmapWidth)];  // Source texel 1
+                let p2 = bitmap[(((tu + duColx2)/ 100) & tuMask) + ((((tv + dvColx2)/ 100) & tvMask) * bitmapWidth)];  // Source texel 2
+                let p3 = bitmap[(((tu + duColx3)/ 100) & tuMask) + ((((tv + dvColx3)/ 100) & tvMask) * bitmapWidth)];  // Source texel 3
+                
+                // Combine 4 texels into 4 vertical screen words by
+                // looking up texel values in dither matrix.
+                let scrnColPtr[ 0] = dP0[p0    ] | dP1[p1    ] | dP2[p2    ] | dP3[p3    ];
+                let scrnColPtr[32] = dP0[p0 + 1] | dP1[p1 + 1] | dP2[p2 + 1] | dP3[p3 + 1];
+                let scrnColPtr[64] = dP0[p0 + 2] | dP1[p1 + 2] | dP2[p2 + 2] | dP3[p3 + 2];
+                let scrnColPtr[96] = dP0[p0 + 3] | dP1[p1 + 3] | dP2[p2 + 3] | dP3[p3 + 3];
+                
+                let tu = tu + duColx4;
+                let tv = tv + dvColx4;          
+                let scrnColPtr = scrnColPtr + 1;    // Next screen word in row.
+            }
+            
+            let rowU = rowU + duRow;
+            let rowV = rowV + dvRow;
+            let scrnRowPtr = scrnRowPtr + 128;      // Skip 4 screen rows.
+        }
+        
+        return;
+    }
+    
+    /**
+     * drawRotoZoom - Blit chunky bitmap to screen at x,y position, rotated,
+     *                zoomed and tiled to fill w,h.
+     *
+     * Bitmap must be a power of 2 in width and height, with a minimum width
+     * of 4.
+     * 
+     * @param int x Position on screen to blit to.
+     * @param int y Position on screen to blit to.
+     * @param int w Width of screen area.
+     * @param int h Height of screnn area.
+     * @param int u Offset into texture to begin at.
+     * @param int v Offset into texture to begin at.
+     * @param int a Rotation angle of texture in degrees.
+     * @param int z Zoom/Scale percentage of texture (10% to 327%).
+     *
+     * @return Nothing, except a gorgeously rotozoomed image on the screen.
+     */
+     /* **** Original version, a little less optimised. ****
+    method void drawRotoZoom (int x, int y, int w, int h, int u, int v, int a, int z) {
+        var int i, j;                           // Screen coordinates.
+        var int scrnRowPtr;                     // Screen current row pointer.
+        var int scrnPtr;                        // Screen pointer.
+        var int tu, tv;                         // Texture u,v
+        var int tuMask, tvMask;                 // Masks to modulo tu, tv.
+        var int p0, p1, p2, p3;                 // Texels to render.
+        
+        var int rowU, rowV;
+        var int duCol, dvCol, duRow, dvRow;
+        
+        let scrnRowPtr = 16384 + x + (y * 32);  // Start of render area.
+        
+        let tuMask = bitmapWidth - 1;           // e.g. 32 - 1 = 0001 1111
+        let tvMask = bitmapHeight - 1;
+        
+        // Calculate deltas.
+        let duCol = (Sinus.cos(a) * z) / 100;
+        let dvCol = (Sinus.sin(a) * z) / 100;
+        
+        let duRow = -dvCol;
+        let dvRow = duCol;
+        
+        // Initial offset into texture.
+        let rowU = (u * 100);
+        let rowV = (v * 100);
+        
+        // Use inverted logic, iterate through screen area and index into
+        // bitmap as a texture.
+        let j = 0;
+        while (j < h) {
+            let scrnPtr = scrnRowPtr;           // Position for this row.
+            let tu = rowU;
+            let tv = rowV;        
+            
+            let i = 0;           
+            while (i < w) {
+
+                let p0 = bitmap[((tu / 100) & tuMask) + (((tv / 100) & tvMask) * bitmapWidth)];  // Source texel 0
+                let tu = tu + duCol;
+                let tv = tv + dvCol;
+                
+                let p1 = bitmap[((tu / 100) & tuMask) + (((tv / 100) & tvMask) * bitmapWidth)];  // Source texel 1
+                let tu = tu + duCol;
+                let tv = tv + dvCol;
+                
+                let p2 = bitmap[((tu / 100) & tuMask) + (((tv / 100) & tvMask) * bitmapWidth)];  // Source texel 2
+                let tu = tu + duCol;
+                let tv = tv + dvCol;
+                
+                let p3 = bitmap[((tu / 100) & tuMask) + (((tv / 100) & tvMask) * bitmapWidth)];  // Source texel 3
+                let tu = tu + duCol;
+                let tv = tv + dvCol;
+                
+                // Combine 4 texels into 4 vertical screen words by
+                // looking up texel values in dither matrix.
+                let scrnPtr[ 0] = dP0[p0    ] | dP1[p1    ] | dP2[p2    ] | dP3[p3    ];
+                let scrnPtr[32] = dP0[p0 + 1] | dP1[p1 + 1] | dP2[p2 + 1] | dP3[p3 + 1];
+                let scrnPtr[64] = dP0[p0 + 2] | dP1[p1 + 2] | dP2[p2 + 2] | dP3[p3 + 2];
+                let scrnPtr[96] = dP0[p0 + 3] | dP1[p1 + 3] | dP2[p2 + 3] | dP3[p3 + 3];
+                                            
+                let scrnPtr = scrnPtr + 1;      // Next screen word in row.
+                let i = i + 1;                  // Next screen word.
+            }
+            
+            let rowU = rowU + duRow;
+            let rowV = rowV + dvRow;
+            let scrnRowPtr = scrnRowPtr + 128;  // Skip 4 screen rows.
+            let j = j + 4;                      // Skip 4 screen rows.
+        }
+        
+        return;
+    }
+    */
+}
