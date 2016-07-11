@@ -16,8 +16,7 @@ just need to be loaded into the VMEmulator and executed as follows:
  - Set the speed slider to "Fast" (not necessary for all demos).
  - Press "F5" to run.
 
-## GASchunky
-Real-time Plasma and Rotozoom.
+## GASchunky: Real-time Plasma and Rotozoom.
 
 ![Alt text](GASchunky/screenshots/screenshot1.png?raw=true "Insert Work Bench")
 ![Alt text](GASchunky/screenshots/screenshot2.png?raw=true "Plasma")
