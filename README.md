@@ -1,9 +1,9 @@
-# Nand2Tetris-Games_and_Demos
+# Nand2Tetris Games and Demos
 A collection of my Nand2Tetris (Elements of Computing) games and demos.
 Nand2Tetris is the Elements of Computing course:
 http://www.nand2tetris.org/
 
-# General execution instructions
+## General execution instructions
 These programs are already compiled with the JackCompiler into vm code, they
 just need to be loaded into the VMEmulator and executed as follows:
 
@@ -16,14 +16,14 @@ just need to be loaded into the VMEmulator and executed as follows:
  - Set the speed slider to "Fast" (not necessary for all demos).
  - Press "F5" to run.
 
-# GASchunky
+## GASchunky
 Real-time Plasma and Rotozoom.
 
 ![Alt text](GASchunky/screenshots/screenshot1.png?raw=true "Insert Work Bench")
 ![Alt text](GASchunky/screenshots/screenshot2.png?raw=true "Plasma")
 ![Alt text](GASchunky/screenshots/screenshot3.png?raw=true "Rotozoom")
-[Animated GIF](GASchunky/screenshots/GASchunky_Plasma_Rotozoom.20131018.gif?raw=true "Real-time Plasma and Rotozoom")
-[Youtube Video](https://www.youtube.com/watch?v=yGV4t_94TiI)
+
+[Watch the YouTube video](https://www.youtube.com/watch?v=yGV4t_94TiI)
 
 This is the most CPU intensive Nand2Tetris demo I have done so far. 'Fast' 
 mode is required in the VMEmulator on an Intel i5 2500K CPU running Linux 
@@ -44,7 +44,7 @@ The demon head was adapted from the fantastic Second Reality PC demo by Future
 Crew.
 http://www.youtube.com/watch?v=rFv7mHTf0nA
 
-# Copyright
+## Copyright
 All programs and files are Copyright 2013-2016 Gavin Stewart.
 
 You are required to give attribution to the author (Gavin Stewart) for any
@@ -53,7 +53,7 @@ use of these programs (GPLv3 Section 7b).
 Trying to pass off my code as your own in your Elements of Computing classes
 will result in a cursed life of forever buggy software.
 
-# Licence
+## Licence
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
