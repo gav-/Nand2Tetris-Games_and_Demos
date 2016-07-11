@@ -3,6 +3,15 @@ A collection of my Nand2Tetris (Elements of Computing) games and demos.
 Nand2Tetris is the Elements of Computing course:
 http://www.nand2tetris.org/
 
+Table of Contents
+=================
+
+  * [Nand2Tetris Games and Demos](#nand2tetris-games-and-demos)
+    * [General execution instructions](#general-execution-instructions)
+    * [GASchunky: Real-time Plasma and Rotozoom.](#gaschunky-real-time-plasma-and-rotozoom)
+    * [Copyright](#copyright)
+    * [Licence](#licence)
+
 ## General execution instructions
 These programs are already compiled with the JackCompiler into vm code, they
 just need to be loaded into the VMEmulator and executed as follows:
