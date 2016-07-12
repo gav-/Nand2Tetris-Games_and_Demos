@@ -58,6 +58,7 @@ http://www.youtube.com/watch?v=rFv7mHTf0nA
 
 ## GASscroller: Sinus text scroller
 ![Alt text](GASscroller/screenshots/screenshot1.png?raw=true "Sinus text scroller")
+
 This is a classic scrolling text demo!
 
 The font is actually from the one embedded into the VMEmulator (as at this
