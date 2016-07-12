@@ -7,12 +7,15 @@ Table of Contents
 =================
 
   * [Nand2Tetris Games and Demos](#nand2tetris-games-and-demos)
-    * [General execution instructions](#general-execution-instructions)
+  * [Table of Contents](#table-of-contents)
+  * [General execution instructions](#general-execution-instructions)
+  * [Games and Demos](#games-and-demos)
     * [GASchunky: Real-time Plasma and Rotozoom.](#gaschunky-real-time-plasma-and-rotozoom)
-    * [Copyright](#copyright)
-    * [Licence](#licence)
+    * [GASscroller: Sinus text scroller](#gasscroller-sinus-text-scroller)
+  * [Copyright](#copyright)
+  * [Licence](#licence)
 
-## General execution instructions
+# General execution instructions
 These programs are already compiled with the JackCompiler into vm code, they
 just need to be loaded into the VMEmulator and executed as follows:
 
@@ -25,6 +28,7 @@ just need to be loaded into the VMEmulator and executed as follows:
  - Set the speed slider to "Fast" (not necessary for all demos).
  - Press "F5" to run.
 
+# Games and Demos
 ## GASchunky: Real-time Plasma and Rotozoom.
 
 ![Alt text](GASchunky/screenshots/screenshot1.png?raw=true "Insert Work Bench")
@@ -52,7 +56,23 @@ The demon head was adapted from the fantastic Second Reality PC demo by Future
 Crew.
 http://www.youtube.com/watch?v=rFv7mHTf0nA
 
-## Copyright
+## GASscroller: Sinus text scroller
+![Alt text](GASscroller/screenshots/screenshot1.png?raw=true "Sinus text scroller")
+This is a classic scrolling text demo!
+
+The font is actually from the one embedded into the VMEmulator as at this
+stage in the course you won't have made your own yet. It is rendered to screen
+a character at a time and saved into an array during the program initialisation.
+
+The text is scrolled from right to left in steps of 2 pixels.
+
+The comments at the top of GASscroller.jack describe how the magic of
+updating ring buffers can reduce the number of calculations required to do
+this. Normally I keep references to any research I have done, and I don't see
+one here, but I do recall that I used some article about scrolling on the
+Commodore 64 for this one.
+
+# Copyright
 All programs and files are Copyright 2013-2016 Gavin Stewart.
 
 You are required to give attribution to the author (Gavin Stewart) for any
@@ -61,7 +81,7 @@ use of these programs (GPLv3 Section 7b).
 Trying to pass off my code as your own in your Elements of Computing classes
 will result in a cursed life of forever buggy software.
 
-## Licence
+# Licence
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or

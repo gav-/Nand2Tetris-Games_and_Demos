@@ -1,0 +1,102 @@
+/**
+ * Extra memory functions.
+ *
+ * Version 1.0
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class MemoryToo {
+
+    /**
+     * Plots all holes (zeroed) in 16K memory to screen.
+     *
+     * Each single word is represented as an 8 pixel high vertical line.
+     * Each row of lines represents 512 words.
+     * The entire screen of 32 rows represents the entire 16K words.
+     *
+     * Can't access the first 2K, results in an exception on VMEmulator: 
+     *   "'That' segment must be in the Heap or Screen range in ...".
+     */
+    function void plotHoles () {
+        var int i, x, y;
+        var int ptr;
+        var int fill;
+        
+        do Screen.setColor(true);                   // Black
+        do Screen.drawRectangle(0, 0, 511, 255);    // Set screen black. 
+        
+        // Hash out first 2K as unreadable.
+        let fill = 21845;                           // Alternating dots.
+        let ptr = 16384;                            // Start of screen RAM.
+        while (y < 32) {        // 2048 words / 512 pixels wide * 8 lines high.
+            let ptr[0] = fill;
+            let ptr = ptr + 1;
+            let x = x + 1;  
+            if (x = 32) { 
+                let fill = ~fill;                   // Invert dots.
+                let x = 0;
+                let y = y + 1;
+            }        
+        }
+        do Output.moveCursor(1, 20);
+        do Output.printString("< 2K hic sunt dracones");
+        
+        // Continue to plot holes in RAM >= 2K
+        let x = 0;     
+        let ptr = 0;                                // Start of RAM.  
+        let i = 2048;                               // Skip first 2K.
+        while (i < 16384) {
+            if (ptr[i] = 0) {
+                do Screen.setColor(false);  // White (hole)
+            } else {
+                do Screen.setColor(true);   // Black
+            }
+
+            do Screen.drawLine(x, y, x, y + 6);
+
+            let x = x + 1;
+            if (x > 511) {
+                let x = 0;
+                let y = y + 8;
+            }
+            let i = i + 1;
+        } 
+        
+        return;
+    }
+    
+    /**
+     * Copies n words from src to dest pointers.
+     *
+     * Memory locations must be above 2K.
+     * Normal RAM: 2K to 16K
+     * Screen RAM: 16K to 24K (8K of screen RAM).
+     */
+    function void copy (int ptr_dest, int ptr_src, int n) {
+        var int i;
+        while (i < n) {
+            let ptr_dest[i] = ptr_src[i];
+            let i = i + 1;
+        }
+        return;
+    }
+}

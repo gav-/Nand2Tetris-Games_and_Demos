@@ -1,0 +1,467 @@
+/**
+ * Implements GASscroller app.
+ 
+  Horizontal text scroller. Uses multiple buffers to hold the scroll text
+  at progressively shifted offsets. Only the last two words of the buffer
+  need be updated per cycle (for each row). The buffers are ring buffers, so 
+  previously calculated offsets are re-used. This method is very efficient! 
+ 
+            <---------- Visible Area ---------> <-- word -->          
+           |___________ ___________ ___________|___________
+           |_____A_____|_____B_____|_____C_____|_____D_____| <- Buffer 0
+        :  |__A_____:__|__B_____:__|__C_____:__|__D_____:__| <- Buffer 1
+     :     A_____:_____B_____:_____C_____:_____D_____:_____| <- Buffer 2
+  :     A  |__:_____B__|__:_____C__|__:_____D__|__:________| <- Buffer 3
+           |_____B_____|_____C_____|_____D_____|_____E_____| <- Buffer 0
+           |                                   |
+           
+  Diagram shows single row from four progressively shifted buffers. Drawing
+  the buffers sequentially makes the content of each word appear to scroll
+  across screen. After the last buffer is drawn, buffer zero is started
+  again, but at the next offset.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class GASscroller {
+
+    field Array scrollSet;      // Set of scroller ring buffers (each shifted).
+    field int scrollNumBuffers; // Number of ring buffers in scrollSet.    
+    field int scrollStride;     // Width of a single row in scroller.
+    field int scrollLen;        // Length of each scroll buffer.
+    field int scrollHead;       // Head of scroller ring buffer.
+    field int scrollTail;       // Last entry of scroller ring buffer.
+    field int scrollBufferIndex;// Index of current buffer.
+    field int scrollX;          // X screen position (in words).
+    field int scrollY;          // Y screen position (in rows).
+    
+    field String scrollText;    // Text string to scroll.
+    field int scrollTextPos;    // Position of next char in scrollText.
+    
+    field Array font;           // Bitmap array of fonts.
+    field int fontHeight;       // Height of font glyphs in rows.
+    field int fontLen;          // Length of fonts bitmap.
+    
+    field Array scrollSinus;    // Sinus table for scroller.
+    field int scrollSinusLen;   // Length of scrollSinus.
+    field int scrollSinusPos;   // Current start position in scrollSinus.
+    field int scrollBlankHeight;// Additional vertical blanking needed.
+    
+      
+    /**
+     * Constructor.
+     */
+    constructor GASscroller new () {
+        var int i;
+        var Array buffer;
+        var String footer;
+             
+        // Setup font. Initialises fontHeight variable.
+        do initFont();                      
+    
+        // Setup constants.
+        let footer = "Text scroller demo.   Gavin Stewart 2013.";
+        // scrollText length must be a factor of 2 for 2bit scroller!
+        let scrollText = "This is the scroll text, it should be long and drag on for a while .... boring everyone to death! It was a dark and stormy night .... in a galaxy far, far away ..... are we there yet ?          ";
+        let scrollNumBuffers = 8;           // 16bit word / 2bit scroll res.
+        let scrollStride = 29;              // On-screen width + one.
+        let scrollY = 40;       
+        let scrollX = 2;
+        let scrollLen = scrollStride * fontHeight; 
+        
+        // Sanity checks.
+        if (MathsToo.mod(scrollText.length(), 2) > 0) {
+            do Output.moveCursor(0,0);
+            do Output.printString("Scroll text _must_ be a factor of 2: ");
+            do Output.printInt(scrollText.length());
+            do Sys.halt();
+        }
+               
+        // Allocate buffers.
+        let scrollSet=Array.new(scrollNumBuffers);
+        while (i < scrollNumBuffers) {
+            let buffer = Array.new(scrollLen);
+            let scrollSet[i] = buffer;
+            let i = i + 1;
+        }
+        
+        // Initialise variables.
+        let scrollTail = scrollStride - 1;
+        
+        // Init sinus.
+        let scrollBlankHeight = 3;
+        do initSinus(0, 15, 25);
+        
+        // Draw screen elements.
+        do Screen.setColor(true);   // black
+        do Screen.drawLine(32, 39, 479, 39);
+        do Screen.drawLine(32, 71, 479, 71);
+        do Screen.drawLine(31, 40, 31, 70);
+        do Screen.drawLine(480, 40, 480, 70);
+        
+        do Output.moveCursor(22, 10);
+        do Output.printString(footer);
+               
+        //do MemoryToo.plotHoles();
+        //do Sys.halt();
+        	          
+        return this;
+    }
+    
+    /**
+     * Destructor.
+     */
+    method void dispose () {
+        var int i;
+        var Array a;
+        
+        while (i < scrollNumBuffers) {
+            let a = scrollSet[i];
+            do a.dispose();
+        }
+        do scrollText.dispose();
+        do font.dispose();
+        do scrollSinus.dispose();
+        
+        do Memory.deAlloc(this);
+        
+        return;
+    }
+
+    method void initFont () {       
+        var int y;
+        var int c;
+        var int j;
+        var int RAM;
+        
+        // Allocate space for font bitmap.
+        let fontHeight = 10;                    // Could do 9 if we ignored
+                                                // lower case.
+        let fontLen = (127 - 32) * fontHeight;  // All defined chars.
+        let font = Array.new(fontLen);                  
+        
+        // Render character glyphs to screen and capture bitmaps.        
+        let y = 0;                          // Bitmap row.
+        let c = 32;                         // Current character.       
+        while (c < 127) {                   // Chars 32 to 126
+            do Output.moveCursor(0, 0);
+	        do Output.printChar(c);
+	       	
+	       	let RAM = 16384 + 32;           // Start of glyph on screen.    
+	        let j = 0;                      // Screen rows read back.
+	        while (j < fontHeight) {
+	            let font[y] = RAM[0];       // Store word to font bitmap.
+	            let RAM = RAM + 32;         // Increment screen row.
+	            let j = j + 1;
+	            let y = y + 1;              // Increment bitmap row.
+	        }
+            let c = c + 1;                  // Increment char.
+        }
+        
+        // Blank out last rendered character
+        do Output.moveCursor(0, 0);
+        do Output.printChar(32);            // Space
+        
+        // DEBUG: draw font bitmap to screen.
+        /*
+        do Screen.setColor(true);           // Black
+        do Screen.drawRectangle(0, 0, 511, 255);
+        let RAM = 16384;
+        let c = 0;          // Font glyph row counter.
+        let j = 0;          // Screen row counter.
+        let y = 0;          // Font bitmap row counter.
+        while ( y < fontLen ) {
+            let RAM[0] = font[y];
+            let RAM = RAM + 32;
+            let c = c + 1;
+            let j = j + 1;
+            let y = y + 1;
+            if (c = fontHeight) {   // One line space between glyhps.
+                let RAM = RAM + 32;
+                let j = j + 1;
+                let c = 0;
+            }
+            if (MathsToo.mod(j, 256) = 0) { // Reached full screen height.
+                let RAM = 16384 + ((j / 256) * 2);  // Set to top of next col.
+            }          
+        }
+        do Sys.halt();
+        */
+        
+        return;
+    }
+    
+    /**
+     * Initialise scroller sinus array.
+     *
+     * @param int min
+     *  Minimum value in sinus table.
+     * @param int max
+     *  Maximum value in sinus table.
+     * @param int steps
+     *  Numnber of steps in sinus table.
+     */     
+    method void initSinus (int min, int max, int steps) {
+        var int i;
+        var int d, scale;
+        
+        do Sinus.init();
+        let scrollSinusLen = steps;
+        let scrollSinus = Sinus.resample(0, 360, scrollSinusLen);
+        
+        let d = max - min;
+        let scale = 200 / d;
+        
+        // Rescale our -100 to 100 sinus range to between min and max.
+        // Must be carefull not to overflow 16bit signed int.
+        while (i < scrollSinusLen) {
+            let scrollSinus[i] = min + ((scrollSinus[i] + 100) / scale);
+            let i = i + 1;
+        }
+        
+        return;
+    }
+        
+    /**
+     * App run loop.
+     */
+    method void run () {
+        var int i;
+    
+        while (1 = 1) {
+            do updateScroller();
+            do drawScroller();   
+            do Sys.wait(15);  
+            
+            // DEBUG: Check RAM contents after some cyles have passed.
+            /*
+            let i = i + 1;
+            if (i > 600) {
+                do MemoryToo.plotHoles();
+                do Sys.halt();
+            } 
+            */     
+        }
+
+        return;
+    }
+ 
+    /**
+     * Render scroller to screen.
+     */
+    method void drawScroller () {
+        var int i, j, width, pos, spos;
+        var int RAM;
+        var int colRAM, colBuffer;
+        var Array buffer;
+        
+        let width = scrollStride -1;                // Last word is not shown.
+        let RAM = 16384 + scrollX + (scrollY * 32); // x = 0, y = 40
+        let buffer = scrollSet[scrollBufferIndex];   
+             
+        // Draw buffer to screen, row at a time.
+        // This is the easiest way, but limits the rows to straight lines
+        // (not sinus), and makes vsync tearing very visible.
+        /*
+        while (j < fontHeight) {
+            let pos = scrollHead;
+            let i = 0;          
+            while (i < width) {
+                let RAM[i] = buffer[pos];
+                let pos = pos + 1;
+                if (pos = scrollStride) {
+                    let pos = 0;
+                }
+                let i = i + 1;
+            }
+            let buffer = buffer + scrollStride; // Increment buffer row.
+            let RAM = RAM + 32;                 // Increment screen row.
+            let j = j + 1;
+        }
+        */
+        
+        // Draw buffer to screen, column at a time.   
+        // More complicated, but we can place columns anywhere now (sinus),
+        // no vsync tearing visible with this method.
+        let spos = scrollSinusPos;
+        let pos = scrollHead;
+        let colRAM = RAM;                           // Start screen column
+        let colBuffer = buffer;                     // Start buffer column
+        while (i < width) {           
+            let RAM = colRAM + i;                   // Screen x offset.
+            let RAM = RAM + (scrollSinus[spos]*32); // Screen y offset. Sinus.
+            let buffer = colBuffer + pos;           // Buffer x offset.
+            let j = 0;
+            while (j < scrollBlankHeight) {         // Some vertical blanking.
+                let RAM[0] = 0;
+                let RAM = RAM + 32;
+                let j = j + 1;
+            }
+            let j = 0;
+            while (j < fontHeight) {                // Draw column from buffer.
+                let RAM[0] = buffer[0];
+                let buffer = buffer + scrollStride; // Increment buffer row.
+                let RAM = RAM + 32;                 // Increment screen row.
+                let j = j + 1;
+            }
+            let j = 0;
+            while (j < scrollBlankHeight) {         // Some vertical blanking.
+                let RAM[0] = 0;
+                let RAM = RAM + 32;
+                let j = j + 1;
+            }
+            let spos = spos + 1;                    // Inc sinus position.
+            if (spos = scrollSinusLen) {
+                let spos = 0;
+            }
+            let pos = pos + 1;                      // Inc buffer position.
+            if (pos = scrollStride) {
+                let pos = 0;
+            }
+            let i = i + 1;
+        }
+        
+        // Update starting offset into sinus, makes it look wiggly and not
+        // static.
+        let scrollSinusPos = scrollSinusPos + 1;
+        if (scrollSinusPos = scrollSinusLen) {
+            let scrollSinusPos = 0;                     // Wrap index.
+        }
+              
+        // Use next buffer next time.
+        let scrollBufferIndex = scrollBufferIndex + 1;
+        if (scrollBufferIndex = scrollNumBuffers) { 
+            let scrollBufferIndex = 0;                  // Wrap index.
+            
+            // Increment tail and head indexes into buffers.
+            let scrollTail = scrollHead;
+            let scrollHead = scrollHead + 1;
+            if (scrollHead = scrollStride) {
+                let scrollHead = 0;                     // Wrap index.
+            }
+            
+            // Increment index into scroll text.
+            let scrollTextPos = scrollTextPos + 2;
+            if (scrollTextPos = scrollText.length()) {
+                let scrollTextPos = 0;                  // Wrap index.
+            }
+        }
+        
+        return;
+    }
+    
+    /**
+     * Update a single scroller buffer before next draw. Only the last
+     * two words in the buffer need be updated (for each row).
+     */
+    method void updateScroller () {
+        var int i, j;
+        var int charVal, charOffsetLow, charOffsetHigh;        
+        var Array buffer, bufferPrev;
+        var int tailPrev, tmp;
+
+        //do Sys.wait(500); 
+        //do Output.moveCursor(0,0);
+        //do Output.printInt(scrollBufferIndex);
+        //do Output.printString(";");
+        
+        // Note: Even though LSB to MSB is drawn right to left, the screen
+        //       renders LSB to MSB left to right. Word operations here show 
+        //       the low part followed by the high part to ease debugging on
+        //       paper.
+    
+        if (scrollBufferIndex = 0) {    // Update 0 buffer directly from font.
+            let buffer = scrollSet[0];
+            
+            // Insert two chars into word (high and low bytes).
+            let charVal = scrollText.charAt(scrollTextPos);
+            let charOffsetLow = (charVal - 32) * fontHeight;    // First char.
+            let charVal = scrollText.charAt(scrollTextPos + 1);
+            let charOffsetHigh = (charVal - 32) * fontHeight;   // Second char.
+            while (j < fontHeight) {
+                let buffer[scrollTail] = font[charOffsetLow] | (font[charOffsetHigh] * 256);
+                
+                let buffer = buffer + scrollStride;     // Increment buffer row.
+                let charOffsetLow = charOffsetLow + 1;  // Increment font row.
+                let charOffsetHigh = charOffsetHigh + 1;
+                let j = j + 1;
+            }
+            
+            return;
+        } 
+        
+        // Update buffer from previous buffer.
+        let buffer = scrollSet[scrollBufferIndex];
+        let bufferPrev = scrollSet[scrollBufferIndex - 1];  // Ok, never < 0
+        
+        if (scrollTail > 0) {
+            let tailPrev = scrollTail - 1;
+        } else {
+            let tailPrev = scrollStride - 1;
+        }
+        
+        while (j < fontHeight) {        
+            // 1bit steps.
+            //let buffer[tailPrev] = MathsToo.lsr(bufferPrev[tailPrev], 1) | MathsToo.lsl(bufferPrev[scrollTail], 15);
+            //let buffer[scrollTail] = bufferPrev[scrollTail] / 2;
+        
+            // 2bit steps.            
+            //let buffer[tailPrev] = MathsToo.lsr(bufferPrev[tailPrev], 2) | (bufferPrev[scrollTail] * 16384);
+            //let buffer[scrollTail] = bufferPrev[scrollTail] / 4;
+            
+            // Optimised 2bit steps via awkward logical shift right by 2 bits.
+            let tmp = bufferPrev[tailPrev];
+            if (tmp < 0) {
+                // MSB == 1, which makes number negative, so we strip sign bit,
+                // then do normal division, then put back bit we stripped
+                // shifted right by 2 bits. Using built in division is faster
+                // than a function call, and faster than a sequence of if(mask)
+                // statements.
+                let tmp = tmp & 32767;   // 0111 1111 1111 1111
+                let tmp = tmp / 4;
+                let tmp = tmp | 8192;    // 0010 0000 0000 0000
+            } else {
+                let tmp = tmp / 4;
+            }           
+            let buffer[tailPrev] = tmp | (bufferPrev[scrollTail] * 16384);  
+            // Note: We get away with ASR bellow only because the value is
+            // never negative (due to glyph always having a one pixel border
+            // on that bit). Otherwise this would also need to be done with
+            // LSR.
+            let buffer[scrollTail] = bufferPrev[scrollTail] / 4;
+            
+            // 4bit steps.
+            //let buffer[tailPrev] = MathsToo.lsr(bufferPrev[tailPrev], 4) | (bufferPrev[scrollTail] * 4096);
+            //let buffer[scrollTail] = bufferPrev[scrollTail] / 16;
+                      
+            // Move onto next row.
+            let buffer = buffer + scrollStride;         // Inc buffer row.
+            let bufferPrev = bufferPrev + scrollStride; // Inc bufferPrev row.
+            let j = j + 1;
+        }
+        
+              
+        
+        return;
+    }   
+  
+}
