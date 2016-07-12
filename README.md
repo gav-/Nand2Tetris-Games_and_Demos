@@ -60,11 +60,14 @@ http://www.youtube.com/watch?v=rFv7mHTf0nA
 ![Alt text](GASscroller/screenshots/screenshot1.png?raw=true "Sinus text scroller")
 This is a classic scrolling text demo!
 
-The font is actually from the one embedded into the VMEmulator as at this
-stage in the course you won't have made your own yet. It is rendered to screen
-a character at a time and saved into an array during the program initialisation.
+The font is actually from the one embedded into the VMEmulator (as at this
+stage in the course we hadn't made our own yet). It is printed to screen
+and read back into an array one character at a time during the program 
+initialisation.
 
-The text is scrolled from right to left in steps of 2 pixels.
+The text is scrolled smoothly from right to left in steps of 2 pixels per
+frame, with each word (16 horizontal pixels) offset vertically based on a 
+value from a precalulated sine table.
 
 The comments at the top of GASscroller.jack describe how the magic of
 updating ring buffers can reduce the number of calculations required to do
