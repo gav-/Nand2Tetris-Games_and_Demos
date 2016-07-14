@@ -1,6 +1,6 @@
 # Nand2Tetris Games and Demos
-A collection of my Nand2Tetris (Elements of Computing) games and demos.
-Nand2Tetris is the Elements of Computing course:
+A collection of my Nand2Tetris games and demos. Nand2Tetris is an online,
+self-teachable course on Building a Modern Computer from First Principles: 
 http://www.nand2tetris.org/
 
 Table of Contents
