@@ -11,6 +11,7 @@ Table of Contents
   * [General execution instructions](#general-execution-instructions)
   * [Games and Demos](#games-and-demos)
     * [GASchunky: Real-time Plasma and Rotozoom.](#gaschunky-real-time-plasma-and-rotozoom)
+    * [GASboing: Bouncing boing ball](#gasboing-bouncing-boing-ball)
     * [GASscroller: Sinus text scroller](#gasscroller-sinus-text-scroller)
   * [Copyright](#copyright)
   * [Licence](#licence)
@@ -19,12 +20,12 @@ Table of Contents
 These programs are already compiled with the JackCompiler into vm code, they
 just need to be loaded into the VMEmulator and executed as follows:
 
- - Download and install the Nand2testris Software Suite (http://www.nand2tetris.org/software.php)
+ - Download and install the Nand2tetris Software Suite (http://www.nand2tetris.org/software.php)
  - Start the VMEmulator.
  - Using File -> Load Program, select the application's directory 
    (e.g. GASchunky) and click the "Load Program" button.
- - Click the "Yes" button to the Confirmation Message popup.
- - Set the Animate: dropdown to "No animation".
+ - Click the "Yes" button to the Confirmation Message pop-up.
+ - Set the Animate: drop-down to "No animation".
  - Set the speed slider to "Fast" (not necessary for all demos).
  - Press "F5" to run.
 
@@ -78,7 +79,8 @@ reversed, changing the direction of rotation and horizontal motion.
 
 Pre-calculation of expensive arithmetic is key to high performance animation.
 Copying a 16-bit word (16 consecutive pixels) to screen memory is cheap,
-calculating a bit shift for the next animation frame would be very expensive. I started with eight frames of the Boing Ball rotating, rendered with Blender.
+calculating a bit shift for the next animation frame would be very expensive.
+I started with eight frames of the Boing Ball rotating, rendered with Blender.
 
 The frames were scaled, cropped, quantised to two colours, shifted by two
 pixels, and padded to an image that was a multiple of 16 pixels in width
@@ -112,7 +114,7 @@ initialisation.
 
 The text is scrolled smoothly from right to left in steps of 2 pixels per
 frame, with each word (16 horizontal pixels) offset vertically based on a 
-value from a precalulated sine table.
+value from a precalculated sine table.
 
 The comments at the top of GASscroller.jack describe how the magic of
 updating ring buffers can reduce the number of calculations required to do
