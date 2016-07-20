@@ -1,0 +1,321 @@
+/**
+ * Implements GASboing app.
+ *
+ * Bouncing boing ball, like the Amiga demo.
+ * Heavily influenced from this ZX81 Demo '25thanni':
+ * http://www.youtube.com/watch?v=sKj6TaADFWo
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class GASboing {
+
+    field Array ball;       // Array of ball frames.
+    field Array shadow;     // Array of shadow frames.
+    field int frames;       // Number of frames.
+    field int width;        // Width of frame in words.
+    field int height;       // Height of frame in rows.
+    
+    field Array yBounce;    // Array of y values that form 1/2 a bounce.
+    field Array yBounceLen; // Length of yBounce array.
+      
+    /**
+     * Constructor.
+     */
+    constructor GASboing new () {
+        var Image frame;
+        
+        let frames = 8;
+        let ball = Array.new(frames);
+        let shadow = Array.new(frames);
+        
+        let frame = ball01.newImage();
+        let ball[0] = frame;
+        let frame = ball02.newImage();
+        let ball[1] = frame;
+        let frame = ball03.newImage();
+        let ball[2] = frame;
+        let frame = ball04.newImage();
+        let ball[3] = frame;
+        let frame = ball05.newImage();
+        let ball[4] = frame;
+        let frame = ball06.newImage();
+        let ball[5] = frame;
+        let frame = ball07.newImage();
+        let ball[6] = frame;
+        let frame = ball08.newImage();
+        let ball[7] = frame;
+        
+        let width = frame.getWidth();
+        let height = frame.getHeight();
+        
+        let frame = shadow01.newImage();
+        let shadow[0] = frame;
+        let frame = shadow02.newImage();
+        let shadow[1] = frame;
+        let frame = shadow03.newImage();
+        let shadow[2] = frame;
+        let frame = shadow04.newImage();
+        let shadow[3] = frame;
+        let frame = shadow05.newImage();
+        let shadow[4] = frame;
+        let frame = shadow06.newImage();
+        let shadow[5] = frame;
+        let frame = shadow07.newImage();
+        let shadow[6] = frame;
+        let frame = shadow08.newImage();
+        let shadow[7] = frame;
+        
+        //do initBounce(15, 256-height, 90);
+        do initBounceSinus(15, 223-height, 50);
+        
+        do Output.moveCursor(22, 4);
+        do Output.printString("Nand to Tetris bouncing ball demo.   Gavin Stewart 2013.");
+        
+        //do MemoryToo.plotHoles();
+        //do Sys.halt();
+        	          
+        return this;
+    }
+    
+    /**
+     * Destructor.
+     */
+    method void dispose () {
+        do ball.dispose();
+        
+        do Memory.deAlloc(this);
+        
+        return;
+    }
+    
+    
+    /**
+     * Initialise bounce array for y axis, forming first half of a bounce
+     * from lowest y (high screen position) to highest y (low screen position).
+     *
+     * @param int yStart
+     *  Initial y starting position (top of screen). Where yStart <= yEnd.
+     * @param int yEnd
+     *  Target y ending position (bottom of screen). Will not quite reach this.
+     * @param int steps
+     *  Number of steps between yStart and yEnd.
+     */
+    method void initBounce (int yStart, int yEnd, int steps) {
+        var int i, y;
+        var int dy;
+        var int intPart, fractPart, err;
+        
+        let yBounce = Array.new(steps);
+        let yBounceLen = steps;
+        
+        let dy = yEnd - yStart;
+        
+        // This is actually a form of the Bresenham line algorithm, simlar
+        // to Image.drawVScale(). It will scale up or down.
+        let intPart = dy / steps;
+        let fractPart = MathsToo.mod(dy, steps);
+              
+        let err = 0;
+        let y = yStart;
+        while (i < steps) {
+            let yBounce[i] = y;
+            let y = y + intPart;
+            let err = err + fractPart;
+            if (err > dy) {
+                let err = err - steps;
+                let y = y + 1;
+            }
+            let i = i + 1;
+        }
+        
+        // DEBUG: Dump yBounce
+        //let i = 0;
+        //while (i < steps) {
+        //    do Output.printInt(yBounce[i]);
+        //    do Output.printString(",");
+        //    let i = i + 1;
+        //}
+        //do Sys.halt();
+      
+        return;
+    }
+    
+    /**
+     * Initialise bounce array for y axis, forming first half of a bounce
+     * from lowest y (high screen position) to highest y (low screen position).
+     *
+     * Initialise from first 90 degrees of sinus table (0 to 100 fixed point).
+     *
+     * @param int yStart
+     *  Initial y starting position (top of screen). Where yStart <= yEnd.
+     * @param int yEnd
+     *  Target y ending position (bottom of screen). Will not quite reach this.
+     * @param int steps
+     *  Number of steps between yStart and yEnd.
+     */
+    method void initBounceSinus (int yStart, int yEnd, int steps) {
+        var int i;
+        var int dy;
+        var int degrees;
+        var int intPart, fractPart, err;
+        
+        do Sinus.init();
+    
+        let yBounce = Array.new(steps);
+        let yBounceLen = steps;
+        
+        let dy = yEnd - yStart;
+                        
+        // This is actually a form of the Bresenham line algorithm, simlar
+        // to Image.drawVScale(). It will scale up or down to fit steps into
+        // first 90 degrees of Sinus table.
+        let intPart = 90 / steps;
+        let fractPart = MathsToo.mod(90, steps);
+        
+        let err = 0;
+        while (i < steps) {
+            let yBounce[i] = yStart + ((dy * (100 - Sinus.sin(degrees))) / 100);
+            let degrees = degrees + intPart;
+            let err = err + fractPart;
+            if (err > degrees) {
+                let err = err - steps;
+                let degrees = degrees + 1;
+            }
+            let i = i + 1;
+        }
+        
+        return;
+    }
+    
+    /**
+     * App run loop.
+     */
+    method void run () {
+        var int i;
+        var int x, xLast, xMax;
+        var int y, yLast, yBounceIndex, yBounceIndexInc;
+        var Image f;
+        
+        let xMax = 32 - width + 1;                      // Right screen border.   
+        let yBounceIndex = yBounceLen - 1;
+        let yBounceIndexInc = -1;
+        let y = yBounce[yBounceIndex];
+        let yLast = y;
+        while (1 = 1) {
+            let x = 0;
+            let xLast = x;
+            while (x < xMax) {                          // Left to right.
+                let  i = 0;
+                while (i < frames) {
+                    let f = ball[i];
+                    do blank(xLast, yLast, y - yLast);
+                    do f.draw(x, y);
+                    let f = shadow[i];
+                    do f.draw(x, 225);
+                    do Sys.wait(15);                   
+                    let yBounceIndex = yBounceIndex + yBounceIndexInc;
+                    if ((yBounceIndex < 0) | (yBounceIndex = yBounceLen)) {
+                        let yBounceIndexInc = -yBounceIndexInc;
+                        let yBounceIndex = yBounceIndex + yBounceIndexInc;
+                    }
+                    let yLast = y;
+                    let y = yBounce[yBounceIndex];
+                    let i = i + 1;
+                }
+                let xLast = x;
+                let x = x + 1;
+            }
+            let x = x - 1;
+            let xLast = x;
+            while (x > -1) {                            // Right to left.
+                let  i = frames;
+                while (i > 0) {
+                    let i = i - 1;
+                    let f = ball[i];
+                    do blank(xLast, yLast, y - yLast);
+                    do f.draw(x, y);
+                    let f = shadow[i];
+                    do f.draw(x, 225);
+                    do Sys.wait(15);
+                    let yBounceIndex = yBounceIndex + yBounceIndexInc;
+                    if ((yBounceIndex < 0) | (yBounceIndex = yBounceLen)) {
+                        let yBounceIndexInc = -yBounceIndexInc;
+                        let yBounceIndex = yBounceIndex + yBounceIndexInc;
+                    }
+                    let yLast = y;
+                    let y = yBounce[yBounceIndex];                 
+                }
+                let xLast = x;
+                let x = x - 1;
+            }
+        }
+        
+        return;
+    }
+    
+    /**
+     * Blank out screen area where vertical motion will leave a trail.
+     *
+     * If dy is positive, the area above the frame is blanked.
+     * If dy is negative, the area under the frame is blanked.
+     * If dy is zero, nothing is drawn.
+     */
+    method void blank (int x, int y, int dy) {
+        var int RAM;
+        var int i, j;
+        
+        if (dy = 0) {    // Nothing to draw, no vertical change.
+            return;
+        }
+        
+        // 16384 == Screen memory address.
+        // 32 == stride (screen width in words) 512 pixels / 16bit words.
+        let RAM = 16384 + x + (y * 32);  
+        
+        if (dy > 0) {
+            while (j < dy) {
+                let i = 0;
+                while (i < width) {
+                    let RAM[i] = 0;
+                    let i = i + 1;
+                }
+                let RAM = RAM + 32;
+                let j  = j + 1;
+            }
+        } else {
+            let RAM = RAM + ((height-1) * 32);  // Skip to bottom of drawn frame.
+            while (j > dy) {
+                let i = 0;
+                while (i < width) {
+                    let RAM[i] = 0;
+                    let i = i + 1;
+                }
+                let RAM = RAM - 32;
+                let j  = j - 1;
+            }
+        }
+        
+        return;
+    }
+  
+}

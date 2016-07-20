@@ -1,0 +1,50 @@
+/**
+ * Static Image factory class.
+ *
+ * Requires Image.jack
+ *
+ * Generated from "shadow02.pbm" by pbm2jack.py
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class shadow02 {
+
+    /**
+     * newImage - returns an Image object containing bitmap data.
+     */
+    function Image newImage () {
+        var Image i;
+        var int width, height;
+
+        let width = 5;
+        let height = 11;
+
+        let i = Image.newBitmap(width, height);
+
+        do i.push(0,21760,1365,0,0,0,-21846,-21846,2,0,16384,21845,21845,21,0,-22528);
+        do i.push(-21846,-21846,170,0,21504,21845,21845,341,0,-22016,-21846,-21846,682,0,21504,21845);
+        do i.push(21845,341,0,-22528,-21846,-21846,170,0,16384,21845,21845,21,0,0,-21846,-21846);
+        do i.push(2,0,0,21760,1365,0,0,0,0,0,0,0,0,0,0,0);
+
+        return i;
+    }
+}

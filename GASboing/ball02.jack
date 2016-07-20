@@ -1,0 +1,65 @@
+/**
+ * Static Image factory class.
+ *
+ * Requires Image.jack
+ *
+ * Generated from "ball02.pbm" by pbm2jack.py
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class ball02 {
+
+    /**
+     * newImage - returns an Image object containing bitmap data.
+     */
+    function Image newImage () {
+        var Image i;
+        var int width, height;
+
+        let width = 5;
+        let height = 60;
+
+        let i = Image.newBitmap(width, height);
+
+        do i.push(0,0,0,0,0,0,-12800,63,0,0,0,448,6146,0,0,0);
+        do i.push(112,15366,0,0,0,-32740,32319,0,0,0,-16378,32767,0,0,0,-4093);
+        do i.push(-3841,8,0,-32767-1,-2047,-32513,48,0,0,-1021,127,96,0,-32767-1,-481,63);
+        do i.push(206,0,-16384,-1,63,510,0,-8192,-769,63,126,0,-4096,-8065,31,254);
+        do i.push(0,-2048,63,31,254,0,-2048,31,12,510,0,-1024,31,16,510,0);
+        do i.push(-1024,15,248,510,0,-512,15,2040,510,0,-512,7,16380,1022,0,-256);
+        do i.push(7,-4,1022,0,-32,3,-2,1016,0,-800,3,-2,960,0,-8096,1);
+        do i.push(-2,768,0,96,1,-1,0,0,112,2,-1,14336,0,48,31,32767);
+        do i.push(30720,0,48,-32513,32767,-2048,0,48,-30721,32767,-2048,0,-32720,-8193,32767,-2048);
+        do i.push(0,-32720,16383,16383,-2048,0,-32720,16383,16376,-1024,0,-32720,8191,16320,-1024,0);
+        do i.push(-16336,8191,7680,-1024,0,-16336,8191,6144,-1024,0,-16336,4095,8192,31744,0,-16352);
+        do i.push(4095,-4096,32257,0,-16192,4095,-4096,32263,0,-14400,2047,-4096,32319,0,-8320,2047);
+        do i.push(-2048,32511,0,16256,2047,-2048,12543,0,16256,1016,-1024,255,0,16128,960,-1024);
+        do i.push(127,0,16128,512,-512,127,0,16128,1024,-512,63,0,15872,15872,-256,63);
+        do i.push(0,15872,-512,-255,31,0,31744,-512,-121,15,0,31744,-512,-1,15,0);
+        do i.push(30720,-256,-449,7,0,-2048,-256,-4065,3,0,-28672,-256,-16369,1,0,8192);
+        do i.push(-254,7,1,0,0,-242,-32761,15,0,0,-4,-16381,31,0,0,-904);
+        do i.push(-8191,7,0,0,-8072,-2048,3,0,0,-16288,-512,0,0,0,-8128,16131);
+        do i.push(0,0,0,-1024,4079,0,0,0,0,0,0,0,0,0,0,0);
+
+        return i;
+    }
+}

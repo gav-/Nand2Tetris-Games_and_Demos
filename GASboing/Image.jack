@@ -1,0 +1,461 @@
+/**
+ * Image class.
+ *
+ * Version 1.5
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ * 
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class Image {
+    field int bitmapWidth;              // In words.
+    field int bitmapHeight;             // In rows.
+    field int bitmapLength;             // Size of bitmap array.      
+    field Array bitmap;                 // Raw, uncompressed bitmap data.
+    
+    field boolean uncompressed;         // True if compressed data has been
+                                        // uncompressed into bitmap.
+    field int dataLength;               // Non zero if compressed data exists.
+    field Array data;                   // Compressed data.
+    
+    field int pushIndex;                // Index of bitmap Array for pushing
+                                        // new words.
+                                        
+    field int deltaXOffset;             // Delta frame x offset.
+    field int deltaYOffset;             // Delta frame y offset.
+    
+    field boolean render;               // True if direct push() render only.
+    field int renderX, renderY;         // Direct render coordinates.
+    field int renderI, renderJ;         // pushRender() state variables.
+    field Array renderPtr;              // pushRender() state variable.
+
+    /**
+     * Constructor
+     *  Allocates bitmap space.
+     */
+    constructor Image newBitmap (int width, int height) {
+        let bitmapWidth = width;
+        let bitmapHeight = height;
+        let bitmapLength = width * height;
+        let bitmap = Array.new(bitmapLength);
+        let render = false;
+        return this;
+    }   
+    
+    /**
+     * Constructor
+     *  Allocates data space for delta image.
+     */
+    constructor Image newDelta (int size, int xOffset, int yOffset, int width, int height) {
+        let deltaXOffset = xOffset;
+        let deltaYOffset = yOffset;
+        let bitmapWidth = width;
+        let bitmapHeight = height;
+        let bitmapLength = size;
+        let bitmap = Array.new(bitmapLength);
+        let render = false;
+        return this;
+    }
+        
+    /**
+     * Constructor
+     *  Does not allocate full bitmap space, can only render through push() 
+     *  method. 16 words are allocated for use as a buffer.
+     */
+    constructor Image newRender (int x, int y, int width, int height) {
+        let render = true;
+        do resetRender(x, y);     
+        
+        let bitmapWidth = width;
+        let bitmapHeight = height;
+        let bitmapLength = 16;
+        let bitmap = Array.new(bitmapLength);
+        return this;
+    } 
+    
+    /** 
+     * Constructor
+     *  Allocates bitmap space then compressed data space.
+     */
+    constructor Image newCompressed (int width, int height, int length) {
+        let bitmapWidth = width;
+        let bitmapHeight = height;
+        let bitmapLength = width * height;
+        let bitmap = Array.new(bitmapLength);
+        
+        let dataLength = length;
+        let data = Array.new(length);
+        
+        let render = false;       
+        return this;
+    }
+    
+    /**
+     * Destructor
+     */
+    method void dispose ()  {
+        do disposeCompressed();
+        do bitmap.dispose();
+        return;
+    }
+    
+    /**
+     * Dispose of just compressed data.
+     */
+    method void disposeCompressed () {
+        if (dataLength > 0) {
+            do data.dispose();
+        }
+        let dataLength = 0;
+        return;
+    }
+    
+    /** Bitmap getters. */
+    method Array getBitmap () { return bitmap; }
+    method ing getLength () { return bitmapLength; }
+    method int getWidth () { return bitmapWidth; }
+    method int getHeight () { return bitmapHeight; }
+    
+    /** Compressed data getter. */
+    method Array getData () { return data; }
+    method int getDataLength () { return dataLength; }
+    
+    /** Direct render getters and setter. */
+    method boolean isRender () { return render; }
+    method void resetRender (int x, int y) {
+        let renderX = x;
+        let renderY = y;
+        let renderI = 0;
+        let renderJ = 0;
+        // 16384 == Screen memory address.
+        // 32 == stride (screen width in words) 512 pixels / 16bit words.
+        let renderPtr = 16384 + renderX + (renderY * 32);   
+        return;
+    }
+    
+    /**
+     * Push 16 words at a time into bitmap.
+     */
+    method void push (int a, int b, int c, int d, int e, int f, int g, int h,
+                      int i, int j, int k, int l, int m, int n, int o, int p) {
+                      
+        var int remain;
+        let remain = bitmapLength - pushIndex;
+        
+        if (remain = 0) {                   // Why were we called ?
+            return;
+        }
+        
+        if (remain > 15) {                  // Using all 16 parameters.
+            let bitmap[pushIndex] = a;
+            let bitmap[pushIndex +  1] = b;
+            let bitmap[pushIndex +  2] = c;
+            let bitmap[pushIndex +  3] = d;
+            let bitmap[pushIndex +  4] = e;
+            let bitmap[pushIndex +  5] = f;
+            let bitmap[pushIndex +  6] = g;
+            let bitmap[pushIndex +  7] = h;
+            let bitmap[pushIndex +  8] = i;
+            let bitmap[pushIndex +  9] = j;
+            let bitmap[pushIndex + 10] = k;
+            let bitmap[pushIndex + 11] = l;
+            let bitmap[pushIndex + 12] = m;
+            let bitmap[pushIndex + 13] = n;
+            let bitmap[pushIndex + 14] = o;
+            let bitmap[pushIndex + 15] = p;
+            let pushIndex = pushIndex + 16;
+        } else {                            // Using 15 or less parameters.
+            let bitmap[pushIndex] = a;
+            if (remain >  1) { let bitmap[pushIndex +  1] = b; }
+            if (remain >  2) { let bitmap[pushIndex +  2] = c; }
+            if (remain >  3) { let bitmap[pushIndex +  3] = d; }
+            if (remain >  4) { let bitmap[pushIndex +  4] = e; }
+            if (remain >  5) { let bitmap[pushIndex +  5] = f; }
+            if (remain >  6) { let bitmap[pushIndex +  6] = g; }
+            if (remain >  7) { let bitmap[pushIndex +  7] = h; }
+            if (remain >  8) { let bitmap[pushIndex +  8] = i; }
+            if (remain >  9) { let bitmap[pushIndex +  9] = j; }
+            if (remain > 10) { let bitmap[pushIndex + 10] = k; }
+            if (remain > 11) { let bitmap[pushIndex + 11] = l; }
+            if (remain > 12) { let bitmap[pushIndex + 12] = m; }
+            if (remain > 13) { let bitmap[pushIndex + 13] = n; }
+            if (remain > 14) { let bitmap[pushIndex + 14] = o; }
+            let pushIndex = bitmapLength;           
+        }
+        
+        if (render) {           // Data is now in bitmap[0..15]
+            do pushRender();
+            let pushIndex = 0;  // Reset for next push.
+        }
+        
+        return;
+    }
+    
+    
+    /**
+     * Draw bitmap to screen.
+     *
+     * High speed, no bounds checking or clipping.
+     *
+     * @param int x 
+     *  In words (there are 512/16 == 32 words across screen).
+     * @parm int y
+     *  In rows (there are 256 rows down screen).
+     */
+    method void draw (int x, int y) {
+        var int i;
+        var int j;
+        var Array RAM;
+        var int bitmapOffset;
+        
+        // 16384 == Screen memory address.
+        // 32 == stride (screen width in words) 512 pixels / 16bit words.
+        let RAM = 16384 + x + (y * 32);  
+
+        // Draw bitmap by poking 16bit words to screen memory.      
+        while (j < bitmapHeight) {   
+            let i = 0;                 
+            while (i < bitmapWidth) {
+                let RAM[i] = bitmap[bitmapOffset + i];
+                let i = i + 1;
+            }
+            let RAM = RAM + 32; 
+            let bitmapOffset = bitmapOffset + bitmapWidth;     
+            let j = j + 1;    
+        }
+        
+        return;
+    }
+    
+    /**
+     * Draw bitmap to screen, vertically scaled.
+     *
+     * High speed, no bounds checking or clipping.
+     *
+     * @param int x
+     *  Starting x position, in words.
+     * @param int y
+     *  Starting y position, in rows.
+     * @pram int height
+     *  Desired scaled height of image.
+     *  Height may be negative to draw image inverted.
+     */
+    method void drawVScale (int x, int y, int height) {
+        var int i, j;
+        var Array RAM;
+        var int bitmapOffset;
+        var int err;
+        var int intPart;
+        var int fractPart;
+        var int offsetStep;
+        
+        if (height = 0) {
+            return;
+        }
+        
+        // 16384 == Screen memory address.
+        // 32 == stride (screen width in words) 512 pixels / 16bit words.
+        let RAM = 16384 + x + (y * 32);  
+        
+        // intPart is always zero where height > bitmapHeight
+        // i.e. it only factors when downscaling.
+        let intPart = (bitmapHeight / height) * bitmapWidth;
+        let fractPart = MathsToo.mod(bitmapHeight, height);
+        let offsetStep = bitmapWidth;
+        
+        if (height < 0) {
+            let height = -height;
+            let bitmapOffset = (bitmapHeight - 1) * bitmapWidth;
+            let offsetStep = -offsetStep;
+        }
+        
+        // Draw vertically scaled.
+        // Variation of Bresenham's line algorithm.
+        let err = 0;
+        while (j < height) {   
+            let i = 0;         
+            while (i < bitmapWidth) {
+                let RAM[i] = bitmap[bitmapOffset + i];
+                let i = i + 1;
+            }
+            let bitmapOffset = bitmapOffset + intPart;
+            let err = err + fractPart;
+            if (err > height) {  
+                let err = err - height;                      
+                let bitmapOffset = bitmapOffset + offsetStep;     
+            } 
+            let RAM = RAM + 32;
+            let j = j + 1;            
+        }
+        
+        return;
+    }
+    
+    /**
+     * Draw single column of bitmap to screen, vertically scaled.
+     *
+     * High speed, no bounds checking or clipping.
+     *
+     * @param int x
+     *  Starting x position, in words.
+     * @param int y
+     *  Starting y position, in rows.
+     * @param int col
+     *  Desired word column to draw.
+     * @pram int height
+     *  Desired scaled height of image.
+     *  Height may be negative to draw image inverted.
+     */
+    method void drawColVScale (int x, int y, int col, int height) {
+        var int j;
+        var Array RAM;
+        var int bitmapOffset;
+        var int err;
+        var int intPart;
+        var int fractPart;
+        var int offsetStep;
+        
+        if (height = 0) {
+            return;
+        }
+                
+        // 16384 == Screen memory address.
+        // 32 == stride (screen width in words) 512 pixels / 16bit words.
+        let RAM = 16384 + x + (y * 32);  
+        
+        // intPart is always zero where height > bitmapHeight
+        // i.e. it only factors when downscaling.
+        let intPart = (bitmapHeight / height) * bitmapWidth;
+        let fractPart = MathsToo.mod(bitmapHeight, height);
+        let offsetStep = bitmapWidth;
+        
+        if (height < 0) {
+            let height = -height;
+            let bitmapOffset = (bitmapHeight - 1) * bitmapWidth;
+            let offsetStep = -offsetStep;
+        }
+        
+        let bitmapOffset = bitmapOffset + col;
+        
+        // Draw vertically scaled.
+        // Variation of Bresenham's line algorithm.
+        let err = 0;
+        while (j < height) {           
+            let RAM[0] = bitmap[bitmapOffset];
+
+            let bitmapOffset = bitmapOffset + intPart;
+            let err = err + fractPart;
+            if (err > height) {  
+                let err = err - height;                      
+                let bitmapOffset = bitmapOffset + offsetStep;     
+            } 
+            let RAM = RAM + 32;
+            let j = j + 1;            
+        }
+        
+        return;
+    }
+    
+    /**
+     * Draw delta data to screen. It is expected that the screen already
+     * contains previous frame data for this to make any sense at all!
+     *
+     * High speed, no bounds checking or clipping.
+     *
+     * @param int x 
+     *  In words (there are 512/16 == 32 words across screen).
+     * @parm int y
+     *  In rows (there are 256 rows down screen).
+     */
+    method void drawDelta (int x, int y) {
+        var int i;
+        var int j;
+        var Array RAM;
+        var int bitmapOffset;
+        
+        var int wordMask;       // Value of current delta mask for 16 words.
+        var int maskMask;       // Mask to apply to wordMask for current word.
+        var int maxMask;        // Maximum allowed value for maskMask.
+        
+        let x = x + deltaXOffset;   // Adjust for delta offset.
+        let y = y + deltaYOffset;
+        
+        // 16384 == Screen memory address.
+        // 32 == stride (screen width in words) 512 pixels / 16bit words.
+        let RAM = 16384 + x + (y * 32);  
+
+        let wordMask = bitmap[0];       // First data value is a 16 word mask.
+        let maskMask = 1;               // 0000 0000 0000 0001
+        let maxMask = -32767-1;         // 1000 0000 0000 0000 (literal -32768)
+        let bitmapOffset = 1;           // Advance index.
+        
+        // Draw bitmap by poking 16bit words to screen memory.      
+        while (j < bitmapHeight) {   
+            let i = 0;                 
+            while (i < bitmapWidth) {
+                if (wordMask & maskMask) {
+                    let RAM[i] = bitmap[bitmapOffset];
+                    let bitmapOffset = bitmapOffset + 1;
+                }                
+                if (maskMask = maxMask) {    
+                    // maskMask has hit the end, fetch the next wordMask
+                    let wordMask = bitmap[bitmapOffset];
+                    let maskMask = 1;
+                    let bitmapOffset = bitmapOffset + 1;
+                } else {
+                    let maskMask = maskMask + maskMask; // 1,2,4 ... 16384, -32768
+                }
+                let i = i + 1;
+            }
+            let RAM = RAM + 32;     
+            let j = j + 1;    
+        }
+        
+        return;
+    }
+    
+    /**
+     * Render data direct to screen, 16 words at a time via push() call.
+     *
+     * This routine is called multiple times, each time with a new 16 words
+     * of data in bitmap[0..15]
+     *
+     * High speed, no bounds checking or clipping.
+     */
+    method void pushRender () {
+        var int bitmapOffset;
+
+        // Draw bitmap by poking 16bit words to screen memory.      
+        while (renderJ < bitmapHeight) {                             
+            while (renderI < bitmapWidth) {
+                let renderPtr[renderI] = bitmap[bitmapOffset];
+                let bitmapOffset = bitmapOffset + 1;
+                let renderI = renderI + 1;
+                if (bitmapOffset > 15) { return; }  // Go back for more data.
+            }           
+            let renderPtr = renderPtr + 32;   
+            let renderI = 0;          
+            let renderJ = renderJ + 1;    
+        }
+        
+        return;
+    }
+    
+}

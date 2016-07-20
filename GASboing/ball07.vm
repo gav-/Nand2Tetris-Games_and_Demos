@@ -1,0 +1,511 @@
+function ball07.newImage 3
+push constant 5
+pop local 1
+push constant 60
+pop local 2
+push local 1
+push local 2
+call Image.newBitmap 2
+pop local 0
+push local 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 7952
+neg
+push constant 15
+push constant 0
+push constant 0
+push constant 0
+push constant 1028
+neg
+push constant 15
+push constant 0
+push constant 0
+call Image.push 17
+pop temp 0
+push local 0
+push constant 0
+push constant 16129
+neg
+push constant 259
+push constant 0
+push constant 0
+push constant 16384
+neg
+push constant 63
+push constant 1792
+push constant 0
+push constant 0
+push constant 4096
+neg
+push constant 31
+push constant 3847
+push constant 0
+push constant 0
+push constant 2048
+neg
+call Image.push 17
+pop temp 0
+push local 0
+push constant 7
+push constant 7999
+push constant 0
+push constant 0
+push constant 768
+neg
+push constant 32765
+neg
+push constant 16383
+push constant 0
+push constant 0
+push constant 3968
+neg
+push constant 16383
+neg
+push constant 14847
+push constant 0
+push constant 0
+push constant 32704
+neg
+push constant 8192
+neg
+call Image.push 17
+pop temp 0
+push local 0
+push constant 16895
+push constant 0
+push constant 0
+push constant 32736
+neg
+push constant 8189
+neg
+push constant 255
+push constant 1
+push constant 0
+push constant 16368
+neg
+push constant 4081
+neg
+push constant 255
+push constant 7
+push constant 0
+push constant 8176
+neg
+push constant 1921
+neg
+push constant 255
+call Image.push 17
+pop temp 0
+push local 0
+push constant 15
+push constant 0
+push constant 8184
+neg
+push constant 1025
+neg
+push constant 255
+push constant 14
+push constant 0
+push constant 4092
+neg
+push constant 3073
+neg
+push constant 255
+push constant 30
+push constant 0
+push constant 4092
+neg
+push constant 31745
+neg
+push constant 255
+push constant 62
+call Image.push 17
+pop temp 0
+push local 0
+push constant 0
+push constant 2046
+neg
+push constant 511
+push constant 252
+push constant 60
+push constant 0
+push constant 1022
+neg
+push constant 511
+push constant 224
+push constant 124
+push constant 0
+push constant 1023
+neg
+push constant 255
+push constant 0
+push constant 124
+push constant 0
+call Image.push 17
+pop temp 0
+push local 0
+push constant 511
+neg
+push constant 255
+push constant 896
+push constant 124
+push constant 0
+push constant 511
+neg
+push constant 127
+push constant 8064
+push constant 252
+push constant 0
+push constant 241
+neg
+push constant 127
+push constant 128
+neg
+push constant 252
+push constant 0
+push constant 129
+neg
+call Image.push 17
+pop temp 0
+push local 0
+push constant 127
+push constant 128
+neg
+push constant 255
+push constant 0
+push constant 769
+neg
+push constant 63
+push constant 64
+neg
+push constant 487
+push constant 32767
+neg
+push constant 1
+sub
+push constant 8065
+neg
+push constant 63
+push constant 64
+neg
+push constant 263
+push constant 32767
+neg
+push constant 1
+sub
+push constant 32641
+neg
+push constant 31
+call Image.push 17
+pop temp 0
+push local 0
+push constant 64
+neg
+push constant 515
+push constant 32767
+neg
+push constant 1
+sub
+push constant 127
+push constant 28
+push constant 32
+neg
+push constant 515
+push constant 32767
+neg
+push constant 1
+sub
+push constant 127
+push constant 0
+push constant 32
+neg
+push constant 515
+push constant 32767
+neg
+push constant 1
+sub
+push constant 63
+push constant 112
+push constant 32
+neg
+call Image.push 17
+pop temp 0
+push local 0
+push constant 515
+push constant 32767
+neg
+push constant 1
+sub
+push constant 63
+push constant 1008
+push constant 32
+neg
+push constant 515
+push constant 32767
+neg
+push constant 1
+sub
+push constant 63
+push constant 8176
+push constant 16
+neg
+push constant 515
+push constant 32767
+neg
+push constant 1
+sub
+push constant 63
+push constant 8
+neg
+push constant 16
+neg
+push constant 515
+call Image.push 17
+pop temp 0
+push local 0
+push constant 32767
+neg
+push constant 1
+sub
+push constant 63
+push constant 8
+neg
+push constant 5
+neg
+push constant 513
+push constant 32767
+neg
+push constant 1
+sub
+push constant 63
+push constant 8
+neg
+push constant 25
+neg
+push constant 513
+push constant 32767
+neg
+push constant 1
+sub
+push constant 31
+push constant 4
+neg
+push constant 249
+neg
+push constant 513
+push constant 32767
+neg
+push constant 1
+sub
+call Image.push 17
+pop temp 0
+push local 0
+push constant 31
+push constant 4
+neg
+push constant 2045
+neg
+push constant 513
+push constant 0
+push constant 28
+push constant 4
+neg
+push constant 8189
+neg
+push constant 0
+push constant 32767
+neg
+push constant 1
+sub
+push constant 0
+push constant 4
+neg
+push constant 1
+push constant 256
+push constant 32767
+neg
+push constant 1
+sub
+push constant 64
+call Image.push 17
+pop temp 0
+push local 0
+push constant 2
+neg
+push constant 1
+push constant 263
+push constant 32767
+neg
+push constant 1
+sub
+push constant 960
+push constant 2
+neg
+push constant 32767
+neg
+push constant 319
+push constant 0
+push constant 8128
+push constant 2
+neg
+push constant 32767
+neg
+push constant 1
+sub
+push constant 127
+push constant 0
+push constant 32705
+push constant 2
+neg
+call Image.push 17
+pop temp 0
+push local 0
+push constant 16384
+neg
+push constant 127
+push constant 0
+push constant 64
+neg
+push constant 32760
+push constant 16384
+neg
+push constant 63
+push constant 0
+push constant 62
+neg
+push constant 32736
+push constant 8192
+neg
+push constant 63
+push constant 0
+push constant 128
+neg
+push constant 16128
+push constant 8192
+neg
+call Image.push 17
+pop temp 0
+push local 0
+push constant 31
+push constant 0
+push constant 124
+neg
+push constant 14336
+push constant 4096
+neg
+push constant 31
+push constant 0
+push constant 128
+neg
+push constant 8192
+push constant 2048
+neg
+push constant 15
+push constant 0
+push constant 128
+neg
+push constant 8192
+neg
+push constant 2048
+neg
+push constant 7
+call Image.push 17
+pop temp 0
+push local 0
+push constant 0
+push constant 240
+neg
+push constant 4096
+neg
+push constant 1017
+neg
+push constant 7
+push constant 0
+push constant 32512
+push constant 2048
+neg
+push constant 481
+neg
+push constant 3
+push constant 0
+push constant 32704
+push constant 2048
+neg
+push constant 257
+neg
+push constant 1
+push constant 0
+call Image.push 17
+pop temp 0
+push local 0
+push constant 29056
+push constant 1024
+neg
+push constant 1921
+neg
+push constant 0
+push constant 0
+push constant 17152
+push constant 1024
+neg
+push constant 16447
+push constant 0
+push constant 0
+push constant 1024
+push constant 511
+neg
+push constant 16415
+push constant 0
+push constant 0
+push constant 2048
+call Image.push 17
+pop temp 0
+push local 0
+push constant 241
+neg
+push constant 12303
+push constant 0
+push constant 0
+push constant 4096
+push constant 65
+neg
+push constant 2051
+push constant 0
+push constant 0
+push constant 0
+push constant 961
+neg
+push constant 513
+push constant 0
+push constant 0
+push constant 0
+push constant 28702
+call Image.push 17
+pop temp 0
+push local 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 28672
+push constant 32
+push constant 0
+push constant 0
+push constant 0
+push constant 256
+neg
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+call Image.push 17
+pop temp 0
+push local 0
+return

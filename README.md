@@ -56,6 +56,50 @@ The demon head was adapted from the fantastic Second Reality PC demo by Future
 Crew.
 http://www.youtube.com/watch?v=rFv7mHTf0nA
 
+## GASboing: Bouncing boing ball
+![Alt text](GASboing/screenshots/screenshot1.png?raw=true "Bouncing boing ball")
+
+[![YouTube Video: Bouncing Ball Demo](https://s.ytimg.com/yts/img/favicon_48-vfl1s0rGh.png)<br>Watch the YouTube video](http://www.youtube.com/watch?v=L_uQlRq6BhI)
+
+A classic bouncing boing ball demo that originated on the Amiga and has been
+duplicated only many other systems.
+
+This version was inspired by the bouncing ball segment in this ZX81 Demo 
+"25thanni": https://youtu.be/sKj6TaADFWo?t=90
+
+The change in direction of the ball's rotation on rebounding was the give away 
+on how to achieve this effect cheaply. The original Amiga Boing Ball demo 
+(https://youtu.be/-ga41edXw3A?t=27) used palette cycling to give the impression
+of rotation, we don't have that option on the Hack machine. I had already done
+significant experimentation with bitmap animations on Hack. The solution was to
+blit a sequence of pre-shifted bitmaps to screen giving the illusion of 
+rotation AND horizontal movement. On rebounding, the sequence is simply
+reversed, changing the direction of rotation and horizontal motion.
+
+Pre-calculation of expensive arithmetic is key to high performance animation.
+Copying a 16-bit word (16 consecutive pixels) to screen memory is cheap,
+calculating a bit shift for the next animation frame would be very expensive. I started with eight frames of the Boing Ball rotating, rendered with Blender.
+
+The frames were scaled, cropped, quantised to two colours, shifted by two
+pixels, and padded to an image that was a multiple of 16 pixels in width
+(using Gimp). This GIF shows the eight frames played back in sequence. Note
+that each frame is the same size, overlaid on the previous, in the same
+location! Only the contents of each frame gives the illusion of motion:
+![Alt text](GASboing/assets/amiga-ball.64.gif?raw=true "Bouncing boing ball")
+
+Each frame was saved out, and converted into a Jack object via a Python script.
+
+When playing back, the eight frames are blitted to the same location in screen
+memory. On completion of the eighth frame, the memory location is incremented
+by one word, and the sequence is repeated. The sequence was designed with
+enough background coloured border to ensure that the consecutive blitted frame
+would erase the trail of the previous, so no flickering occurs from blanking
+(at least for horizontal motion).
+
+The vertical motion of the ball is from a pre-calculated sine table. There is
+also some blanking required to erase the remainder of the previous frame above
+(or below) the current one.
+
 ## GASscroller: Sinus text scroller
 ![Alt text](GASscroller/screenshots/screenshot1.png?raw=true "Sinus text scroller")
 

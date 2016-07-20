@@ -1,0 +1,90 @@
+function MathsToo.lsl 0
+label WHILE_EXP0
+push argument 1
+push constant 0
+gt
+not
+if-goto WHILE_END0
+push argument 0
+push argument 0
+add
+pop argument 0
+push argument 1
+push constant 1
+sub
+pop argument 1
+goto WHILE_EXP0
+label WHILE_END0
+push argument 0
+return
+function MathsToo.lsr 4
+push constant 1
+pop local 0
+push argument 1
+push constant 1
+sub
+pop argument 1
+label WHILE_EXP0
+push argument 1
+push constant 0
+gt
+not
+if-goto WHILE_END0
+push local 0
+push local 0
+add
+pop local 0
+push argument 1
+push constant 1
+sub
+pop argument 1
+goto WHILE_EXP0
+label WHILE_END0
+push constant 32767
+neg
+push constant 1
+sub
+pop local 1
+push constant 1
+pop local 2
+label WHILE_EXP1
+push local 0
+push local 1
+eq
+not
+not
+if-goto WHILE_END1
+push local 0
+push local 0
+add
+pop local 0
+push argument 0
+push local 0
+and
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 3
+push local 2
+or
+pop local 3
+label IF_FALSE0
+push local 2
+push local 2
+add
+pop local 2
+goto WHILE_EXP1
+label WHILE_END1
+push local 3
+return
+function MathsToo.mod 1
+push argument 0
+push argument 1
+call Math.divide 2
+pop local 0
+push argument 0
+push argument 1
+push local 0
+call Math.multiply 2
+sub
+return

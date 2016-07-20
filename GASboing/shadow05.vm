@@ -1,0 +1,101 @@
+function shadow05.newImage 3
+push constant 5
+pop local 1
+push constant 11
+pop local 2
+push local 1
+push local 2
+call Image.newBitmap 2
+pop local 0
+push local 0
+push constant 0
+push constant 16384
+push constant 21845
+push constant 1
+push constant 0
+push constant 0
+push constant 21888
+neg
+push constant 21846
+neg
+push constant 170
+push constant 0
+push constant 0
+push constant 21840
+push constant 21845
+push constant 1365
+push constant 0
+push constant 0
+call Image.push 17
+pop temp 0
+push local 0
+push constant 21846
+neg
+push constant 21846
+neg
+push constant 10922
+push constant 0
+push constant 0
+push constant 21845
+push constant 21845
+push constant 21845
+push constant 0
+push constant 32767
+neg
+push constant 1
+sub
+push constant 21846
+neg
+push constant 21846
+neg
+push constant 21846
+neg
+push constant 0
+push constant 0
+push constant 21845
+call Image.push 17
+pop temp 0
+push local 0
+push constant 21845
+push constant 21845
+push constant 0
+push constant 0
+push constant 21846
+neg
+push constant 21846
+neg
+push constant 10922
+push constant 0
+push constant 0
+push constant 21840
+push constant 21845
+push constant 1365
+push constant 0
+push constant 0
+push constant 21888
+neg
+push constant 21846
+neg
+call Image.push 17
+pop temp 0
+push local 0
+push constant 170
+push constant 0
+push constant 0
+push constant 16384
+push constant 21845
+push constant 1
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+push constant 0
+call Image.push 17
+pop temp 0
+push local 0
+return
