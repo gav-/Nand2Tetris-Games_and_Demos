@@ -62,8 +62,8 @@ http://www.youtube.com/watch?v=rFv7mHTf0nA
 
 [![YouTube Video: Bouncing Ball Demo](https://s.ytimg.com/yts/img/favicon_48-vfl1s0rGh.png)<br>Watch the YouTube video](http://www.youtube.com/watch?v=L_uQlRq6BhI)
 
-A classic bouncing boing ball demo that originated on the Amiga and has been
-duplicated only many other systems.
+A classic bouncing boing ball demo that originated on the Amiga and has since
+been duplicated on many other systems.
 
 This version was inspired by the bouncing ball segment in this ZX81 Demo 
 "25thanni": https://youtu.be/sKj6TaADFWo?t=90
