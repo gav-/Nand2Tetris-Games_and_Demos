@@ -35,7 +35,7 @@ just need to be loaded into the VMEmulator and executed as follows:
 ![Alt text](GASchunky/screenshots/screenshot2.png?raw=true "Plasma")
 ![Alt text](GASchunky/screenshots/screenshot3.png?raw=true "Rotozoom")
 
-[Watch the YouTube video](https://www.youtube.com/watch?v=yGV4t_94TiI)
+[![YouTube Video: Real-time Plasma and Rotozoom Demo](https://s.ytimg.com/yts/img/favicon_48-vfl1s0rGh.png)Watch the YouTube video](http://www.youtube.com/watch?v=yGV4t_94TiI)
 
 This is the most CPU intensive Nand2Tetris demo I have done so far. 'Fast' 
 mode is required in the VMEmulator on an Intel i5 2500K CPU running Linux 
