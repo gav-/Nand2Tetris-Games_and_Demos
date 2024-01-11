@@ -1,0 +1,60 @@
+function PRNG.rand 0
+push argument 0
+push constant 1
+add
+pop argument 0
+call PRNG.randInt 0
+push constant 1
+sub
+push static 2
+push argument 0
+call Math.divide 2
+call Math.divide 2
+return
+function PRNG.randInt 1
+push static 1
+push static 0
+push static 3
+call MathsToo.mod 2
+call Math.multiply 2
+push static 4
+push static 0
+push static 3
+call Math.divide 2
+call Math.multiply 2
+sub
+pop local 0
+push local 0
+push constant 0
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 0
+pop static 0
+goto IF_END0
+label IF_FALSE0
+push local 0
+push static 2
+add
+pop static 0
+label IF_END0
+push static 0
+return
+function PRNG.seed 0
+push argument 0
+pop static 0
+push constant 32749
+pop static 2
+push constant 219
+pop static 1
+push static 2
+push static 1
+call Math.divide 2
+pop static 3
+push static 2
+push static 1
+call MathsToo.mod 2
+pop static 4
+push constant 0
+return

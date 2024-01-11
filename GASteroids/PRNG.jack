@@ -1,0 +1,77 @@
+/**
+ * Pseudo Random Number Generator static class.
+ *
+ * Linear congruential generator using multiplicative congruential method.
+ *
+ * References:
+ *  http://en.wikipedia.org/wiki/Linear_congruential_generator
+ *  http://www.cse.wustl.edu/~jain/cse567-08/ftp/k_26rng.pdf
+ *  http://statmath.wu.ac.at/prng/doc/prng.html
+ *  https://www.rocq.inria.fr/mathfi/Premia/free-version/doc/premia-doc/pdf_html/common/math/random_doc.pdf
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class PRNG {
+    static int seed;
+    static int A;
+    static int M;
+    static int Q;
+    static int R;
+
+    // Returns a random number in the range 0 to max inclusive.
+    function int rand (int max) {
+        let max = max + 1;
+        return ((PRNG.randInt() - 1) / (M / max));
+    }
+
+    /**
+     * Returns a random number in the range 1 to M-1 inclusive.
+     *
+     * x(n+1) = ax(n) mod m
+     *
+     * May lead to overflow in the product ax for x < m. Avoid this with
+     * Shrage's method (Fortran 1979):
+     * http://degiorgi.math.hr/aaa_sem/Rand_Gen/p132-schrage.pdf
+     */
+    function int randInt () {
+        var int x_new;
+
+        let x_new = (A * MathsToo.mod(seed, Q)) - (R * (seed / Q));
+
+        if (x_new > 0) {
+            let seed = x_new;
+        } else {
+            let seed = x_new + M;
+        }
+
+        return seed;
+    }
+
+    function void seed (int s) {
+        let seed = s;
+        let M = 32749;  // Published known M and A integer values for PRNGs.
+        let A = 219;
+        let Q = M / A;
+        let R = MathsToo.mod(M, A);
+        return;
+    }
+}

@@ -1,7 +1,10 @@
 # Nand2Tetris Games and Demos
 A collection of my Nand2Tetris games and demos. Nand2Tetris is an online,
-self-teachable course on Building a Modern Computer from First Principles: 
-http://www.nand2tetris.org/
+self-teachable course on Building a Modern Computer from First Principles:
+https://www.nand2tetris.org/
+
+There is some discussion of these games and demos on the [Nand2Tetris
+Questions and Answers Forum](http://nand2tetris-questions-and-answers-forum.52.s1.nabble.com/Action-games-and-demos-Chapter-9-td4027991.html).
 
 Table of Contents
 =================
@@ -13,6 +16,7 @@ Table of Contents
     * [GASchunky: Real-time Plasma and Rotozoom.](#gaschunky-real-time-plasma-and-rotozoom)
     * [GASboing: Bouncing boing ball](#gasboing-bouncing-boing-ball)
     * [GASscroller: Sinus text scroller](#gasscroller-sinus-text-scroller)
+    * [GASteroids: Classic asteroids like game](#gasteroids-classic-asteroids-like-game)
   * [Copyright](#copyright)
   * [Licence](#licence)
 
@@ -22,7 +26,7 @@ just need to be loaded into the VMEmulator and executed as follows:
 
  - Download and install the Nand2tetris Software Suite (http://www.nand2tetris.org/software.php)
  - Start the VMEmulator.
- - Using File -> Load Program, select the application's directory 
+ - Using File -> Load Program, select the application's directory
    (e.g. GASchunky) and click the "Load Program" button.
  - Click the "Yes" button to the Confirmation Message pop-up.
  - Set the Animate: drop-down to "No animation".
@@ -32,48 +36,48 @@ just need to be loaded into the VMEmulator and executed as follows:
 # Games and Demos
 ## GASchunky: Real-time Plasma and Rotozoom.
 
-![Alt text](GASchunky/screenshots/screenshot1.png?raw=true "Insert Work Bench")
-![Alt text](GASchunky/screenshots/screenshot2.png?raw=true "Plasma")
-![Alt text](GASchunky/screenshots/screenshot3.png?raw=true "Rotozoom")
+![Insert Work Bench](GASchunky/screenshots/screenshot1.png?raw=true "Insert Work Bench")
+![Plasma Screenshot](GASchunky/screenshots/screenshot2.png?raw=true "Plasma")
+![Rotozoom Screenshot](GASchunky/screenshots/screenshot3.png?raw=true "Rotozoom")
 
 [![YouTube Video: Real-time Plasma and Rotozoom Demo](https://s.ytimg.com/yts/img/favicon_48-vfl1s0rGh.png)<br>Watch the YouTube video](http://www.youtube.com/watch?v=yGV4t_94TiI)
 
-This is the most CPU intensive Nand2Tetris demo I have done so far. 'Fast' 
-mode is required in the VMEmulator on an Intel i5 2500K CPU running Linux 
-Mint with OpenJDK 1.7.0_25. All code is written in pure Jack and compiled 
-with the provided complier running on the provided VMEmulator. 
+This is the most CPU intensive Nand2Tetris demo I have done so far. 'Fast'
+mode is required in the VMEmulator on an Intel i5 2500K CPU running Linux
+Mint with OpenJDK 1.7.0_25. All code is written in pure Jack and compiled
+with the provided complier running on the provided VMEmulator.
 
-Conversion from a chunky bitmap to planar architecture is done on-the-fly 
-with 17 greyscale shades. Each shade in the chunky source image is converted 
+Conversion from a chunky bitmap to planar architecture is done on-the-fly
+with 17 greyscale shades. Each shade in the chunky source image is converted
 to a 4x4 pixel block in the final output through an ordered dither table.
 http://en.wikipedia.org/wiki/Ordered_dithering
 
-The monitor image is an adaptation of 'Amiga Lagoon' artwork by the famous 
+The monitor image is an adaptation of 'Amiga Lagoon' artwork by the famous
 Amiga artist James "Jim" Sachs.
 http://www.palmerfamily.name/sachs.html
 http://www.youtube.com/user/JDSachs
 
-The demon head was adapted from the fantastic Second Reality PC demo by Future 
+The demon head was adapted from the fantastic Second Reality PC demo by Future
 Crew.
 http://www.youtube.com/watch?v=rFv7mHTf0nA
 
 ## GASboing: Bouncing boing ball
-![Alt text](GASboing/screenshots/screenshot1.png?raw=true "Bouncing boing ball")
+![Bouncing boing ball](GASboing/screenshots/screenshot1.png?raw=true "Bouncing boing ball")
 
 [![YouTube Video: Bouncing Ball Demo](https://s.ytimg.com/yts/img/favicon_48-vfl1s0rGh.png)<br>Watch the YouTube video](http://www.youtube.com/watch?v=L_uQlRq6BhI)
 
 A classic bouncing boing ball demo that originated on the Amiga and has since
 been duplicated on many other systems.
 
-This version was inspired by the bouncing ball segment in this ZX81 Demo 
+This version was inspired by the bouncing ball segment in this ZX81 Demo
 "25thanni": https://youtu.be/sKj6TaADFWo?t=90
 
-The change in direction of the ball's rotation on rebounding was the give away 
-on how to achieve this effect cheaply. The original Amiga Boing Ball demo 
+The change in direction of the ball's rotation on rebounding was the give away
+on how to achieve this effect cheaply. The original Amiga Boing Ball demo
 (https://youtu.be/-ga41edXw3A?t=27) used palette cycling to give the impression
 of rotation, we don't have that option on the Hack machine. I had already done
 significant experimentation with bitmap animations on Hack. The solution was to
-blit a sequence of pre-shifted bitmaps to screen giving the illusion of 
+blit a sequence of pre-shifted bitmaps to screen giving the illusion of
 rotation AND horizontal movement. On rebounding, the sequence is simply
 reversed, changing the direction of rotation and horizontal motion.
 
@@ -103,17 +107,17 @@ also some blanking required to erase the remainder of the previous frame above
 (or below) the current one.
 
 ## GASscroller: Sinus text scroller
-![Alt text](GASscroller/screenshots/screenshot1.png?raw=true "Sinus text scroller")
+![Sinus text scroller](GASscroller/screenshots/screenshot1.png?raw=true "Sinus text scroller")
 
 This is a classic scrolling text demo!
 
 The font is actually from the one embedded into the VMEmulator (as at this
 stage in the course we hadn't made our own yet). It is printed to screen
-and read back into an array one character at a time during the program 
+and read back into an array one character at a time during the program
 initialisation.
 
 The text is scrolled smoothly from right to left in steps of 2 pixels per
-frame, with each word (16 horizontal pixels) offset vertically based on a 
+frame, with each word (16 horizontal pixels) offset vertically based on a
 value from a precalculated sine table.
 
 The comments at the top of GASscroller.jack describe how the magic of
@@ -121,6 +125,38 @@ updating ring buffers can reduce the number of calculations required to do
 this. Normally I keep references to any research I have done, and I don't see
 one here, but I do recall that I used some article about scrolling on the
 Commodore 64 for this one.
+
+## GASteroids: Classic asteroids like game
+![GASteroids Gameplay](GASteroids/screenshots/screenshot1.png?raw=true "Classic asteroids like game")
+
+[![YouTube Video: GASteroids Gameplay](https://s.ytimg.com/yts/img/favicon_48-vfl1s0rGh.png)<br>Watch GASteroids Gameplay on YouTube](http://www.youtube.com/watch?v=f5znnQonaso)
+
+The player controls a spaceship in an asteroid field. The goal is to
+destroy asteroids and survive as long as possible.
+
+The player can rotate the ship left and right, thrust forward, and fire
+weapons to destroy asteroids. Large asteroids split into smaller asteroids
+when hit. Small asteroids disappear when hit.
+
+Colliding with an asteroid will destroy the player's ship. A new ship will
+be granted after each death.
+
+Keyboard controls:
+```
+<space> - start game / spawn new ship / shoot weapon.
+<left arrow> - rotate ship counter-clockwise.
+<right arrow> - rotate ship clockwise.
+<up arrow> - fire thrusters.
+<-> - decrease frame delay (speed up game).
+<+> - increase frame delay (slow down game).
+```
+
+This game uses line drawing for all the playfield elements. To refresh the
+playfield each frame, the elements are erased by redrawing them in the
+background colour before redrawing them in their new positions using the
+foreground colour. This technique causes some flickering, but otherwise the
+game is quite playable.
+
 
 # Copyright
 All programs and files are Copyright 2013-2016 Gavin Stewart.

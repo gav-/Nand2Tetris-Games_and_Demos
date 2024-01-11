@@ -1,0 +1,293 @@
+function StarBurst.new 0
+push constant 8
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+pop this 2
+push argument 1
+pop this 5
+push argument 0
+push this 5
+call Math.divide 2
+pop this 6
+push this 6
+push constant 1
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 1
+pop this 6
+label IF_FALSE0
+push pointer 0
+return
+function StarBurst.dispose 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function StarBurst.init 0
+push argument 0
+pop pointer 0
+push argument 1
+pop this 0
+push argument 2
+pop this 1
+push this 6
+pop this 3
+push constant 0
+pop this 4
+push this 5
+push constant 2
+call Math.divide 2
+pop this 7
+push constant 0
+return
+function StarBurst.redraw 1
+push argument 0
+pop pointer 0
+push this 3
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 3
+push this 6
+sub
+pop local 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push this 0
+push local 0
+add
+push this 1
+push local 0
+add
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push local 0
+add
+push this 1
+push local 0
+sub
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push local 0
+sub
+push this 1
+push local 0
+sub
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push local 0
+sub
+push this 1
+push local 0
+add
+call Screen.drawPixel 2
+pop temp 0
+push this 3
+push this 2
+lt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 3
+add
+push this 1
+push this 3
+add
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push this 3
+add
+push this 1
+push this 3
+sub
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push this 3
+sub
+push this 1
+push this 3
+sub
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push this 3
+sub
+push this 1
+push this 3
+add
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE1
+label IF_FALSE0
+push this 4
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 4
+push this 6
+sub
+pop local 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push local 0
+add
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push local 0
+add
+push this 1
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push this 1
+push local 0
+sub
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push local 0
+sub
+push this 1
+call Screen.drawPixel 2
+pop temp 0
+push this 4
+push this 2
+lt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 4
+add
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push this 4
+add
+push this 1
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push this 1
+push this 4
+sub
+call Screen.drawPixel 2
+pop temp 0
+push this 0
+push this 4
+sub
+push this 1
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE3
+label IF_FALSE2
+push constant 0
+return
+function StarBurst.tick 0
+push argument 0
+pop pointer 0
+push this 3
+push constant 0
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 4
+push constant 0
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 0
+return
+label IF_FALSE1
+label IF_FALSE0
+push this 3
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 3
+push this 6
+add
+pop this 3
+push this 3
+push this 2
+sub
+push this 6
+gt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 0
+pop this 3
+label IF_FALSE3
+label IF_FALSE2
+push this 4
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push this 4
+push this 6
+add
+pop this 4
+push this 4
+push this 2
+sub
+push this 6
+gt
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push constant 0
+pop this 4
+label IF_FALSE5
+label IF_FALSE4
+push this 7
+push constant 0
+gt
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push this 7
+push constant 1
+sub
+pop this 7
+push this 7
+push constant 0
+eq
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push this 6
+pop this 4
+label IF_FALSE7
+label IF_FALSE6
+push constant 0
+not
+return

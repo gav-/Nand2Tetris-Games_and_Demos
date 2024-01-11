@@ -1,0 +1,640 @@
+function Ship.new 0
+push constant 15
+call Memory.alloc 1
+pop pointer 0
+call Constant.getFieldXY 0
+pop this 14
+push constant 8
+push constant 10
+call Math.multiply 2
+pop this 2
+push constant 5
+call DrawPoly.new 1
+pop this 9
+push this 9
+push constant 0
+push constant 6
+neg
+call DrawPoly.push 3
+pop temp 0
+push this 9
+push constant 4
+push constant 6
+call DrawPoly.push 3
+pop temp 0
+push this 9
+push constant 2
+push constant 3
+call DrawPoly.push 3
+pop temp 0
+push this 9
+push constant 2
+neg
+push constant 3
+call DrawPoly.push 3
+pop temp 0
+push this 9
+push constant 4
+neg
+push constant 6
+call DrawPoly.push 3
+pop temp 0
+push constant 3
+call DrawPoly.new 1
+pop this 10
+push this 10
+push constant 2
+push constant 3
+call DrawPoly.push 3
+pop temp 0
+push this 10
+push constant 0
+push constant 6
+call DrawPoly.push 3
+pop temp 0
+push this 10
+push constant 2
+neg
+push constant 3
+call DrawPoly.push 3
+pop temp 0
+push constant 4
+call Shots.new 1
+pop this 11
+push this 2
+push constant 10
+call Math.divide 2
+push constant 1
+sub
+push constant 4
+call StarBurst.new 2
+pop this 12
+push pointer 0
+return
+function Ship.dispose 0
+push argument 0
+pop pointer 0
+push this 9
+call DrawPoly.dispose 1
+pop temp 0
+push this 10
+call DrawPoly.dispose 1
+pop temp 0
+push this 11
+call Shots.dispose 1
+pop temp 0
+push this 12
+call StarBurst.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function Ship.fireShot 0
+push argument 0
+pop pointer 0
+push this 8
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
+push this 3
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 11
+push this 0
+push this 1
+push this 4
+push this 5
+push this 6
+call Shots.fire 6
+pop temp 0
+goto IF_END1
+label IF_FALSE1
+push pointer 0
+call Ship.spawn 1
+pop temp 0
+label IF_END1
+push constant 0
+return
+function Ship.fireThruster 2
+push argument 0
+pop pointer 0
+push this 6
+call Sinus.sin 1
+pop local 0
+push this 6
+call Sinus.cos 1
+pop local 1
+push local 0
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 0
+push constant 5
+sub
+pop local 0
+goto IF_END0
+label IF_FALSE0
+push local 0
+push constant 0
+gt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 0
+push constant 5
+add
+pop local 0
+label IF_FALSE1
+label IF_END0
+push local 1
+push constant 0
+lt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push local 1
+push constant 5
+sub
+pop local 1
+goto IF_END2
+label IF_FALSE2
+push local 1
+push constant 0
+gt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push local 1
+push constant 5
+add
+pop local 1
+label IF_FALSE3
+label IF_END2
+push this 4
+push local 0
+push constant 10
+call Math.divide 2
+add
+pop this 4
+push this 5
+push local 1
+push constant 10
+call Math.divide 2
+sub
+pop this 5
+push this 4
+push constant 100
+neg
+lt
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 100
+neg
+pop this 4
+goto IF_END4
+label IF_FALSE4
+push this 4
+push constant 100
+gt
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push constant 100
+pop this 4
+label IF_FALSE5
+label IF_END4
+push this 5
+push constant 100
+neg
+lt
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 100
+neg
+pop this 5
+goto IF_END6
+label IF_FALSE6
+push this 5
+push constant 100
+gt
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push constant 100
+pop this 5
+label IF_FALSE7
+label IF_END6
+push constant 7
+pop this 7
+push constant 0
+return
+function Ship.changeHeading 0
+push argument 0
+pop pointer 0
+push this 6
+push argument 1
+add
+pop this 6
+push this 6
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 360
+push this 6
+add
+pop this 6
+goto IF_END0
+label IF_FALSE0
+push this 6
+push constant 359
+gt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 6
+push constant 360
+sub
+pop this 6
+label IF_FALSE1
+label IF_END0
+push constant 0
+return
+function Ship.redraw 0
+push argument 0
+pop pointer 0
+push this 11
+call Shots.redraw 1
+pop temp 0
+push this 3
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 7
+push constant 0
+gt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 10
+call DrawPoly.redraw 1
+pop temp 0
+label IF_FALSE1
+push this 9
+call DrawPoly.redraw 1
+pop temp 0
+goto IF_END0
+label IF_FALSE0
+push this 13
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 12
+call StarBurst.redraw 1
+pop temp 0
+label IF_FALSE2
+label IF_END0
+push constant 0
+return
+function Ship.spawn 0
+push argument 0
+pop pointer 0
+push constant 2
+push this 14
+add
+pop pointer 1
+push that 0
+push constant 2
+call Math.divide 2
+pop this 0
+push constant 3
+push this 14
+add
+pop pointer 1
+push that 0
+push constant 2
+call Math.divide 2
+pop this 1
+push constant 0
+pop this 4
+push constant 0
+pop this 5
+push constant 0
+pop this 6
+push constant 0
+pop this 7
+push constant 0
+not
+pop this 3
+push constant 10
+pop this 8
+push constant 0
+return
+function Ship.tick 4
+push argument 0
+pop pointer 0
+push this 11
+push argument 1
+push argument 2
+call Shots.tick 3
+pop temp 0
+push this 13
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 12
+call StarBurst.tick 1
+pop this 13
+label IF_FALSE0
+push this 8
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 8
+push constant 1
+sub
+pop this 8
+label IF_FALSE1
+push this 3
+not
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 0
+return
+label IF_FALSE2
+push this 0
+push this 4
+add
+pop this 0
+push this 1
+push this 5
+add
+pop this 1
+push this 0
+push constant 0
+push this 14
+add
+pop pointer 1
+push that 0
+push this 2
+add
+lt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 2
+push this 14
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+pop this 0
+goto IF_END3
+label IF_FALSE3
+push this 0
+push constant 2
+push this 14
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+gt
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 0
+push this 14
+add
+pop pointer 1
+push that 0
+push this 2
+add
+pop this 0
+label IF_FALSE4
+label IF_END3
+push this 1
+push constant 1
+push this 14
+add
+pop pointer 1
+push that 0
+push this 2
+add
+lt
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push constant 3
+push this 14
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+pop this 1
+goto IF_END5
+label IF_FALSE5
+push this 1
+push constant 3
+push this 14
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+gt
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 1
+push this 14
+add
+pop pointer 1
+push that 0
+push this 2
+add
+pop this 1
+label IF_FALSE6
+label IF_END5
+push constant 0
+pop local 2
+label WHILE_EXP0
+push local 2
+push argument 2
+lt
+not
+if-goto WHILE_END0
+push local 2
+push argument 1
+add
+pop pointer 1
+push that 0
+pop local 3
+push local 3
+push this 0
+push this 1
+push this 2
+call Asteroid.collision 4
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push constant 1
+neg
+call Score.changeLife 1
+pop temp 0
+push constant 0
+pop this 3
+push constant 10
+pop this 8
+label IF_FALSE7
+push local 2
+push constant 1
+add
+pop local 2
+goto WHILE_EXP0
+label WHILE_END0
+push this 0
+pop local 0
+push this 1
+pop local 1
+push local 0
+push constant 0
+lt
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push local 0
+push constant 5
+sub
+pop local 0
+goto IF_END8
+label IF_FALSE8
+push local 0
+push constant 0
+gt
+if-goto IF_TRUE9
+goto IF_FALSE9
+label IF_TRUE9
+push local 0
+push constant 5
+add
+pop local 0
+label IF_FALSE9
+label IF_END8
+push local 1
+push constant 0
+lt
+if-goto IF_TRUE10
+goto IF_FALSE10
+label IF_TRUE10
+push local 1
+push constant 5
+sub
+pop local 1
+goto IF_END10
+label IF_FALSE10
+push local 1
+push constant 0
+gt
+if-goto IF_TRUE11
+goto IF_FALSE11
+label IF_TRUE11
+push local 1
+push constant 5
+add
+pop local 1
+label IF_FALSE11
+label IF_END10
+push local 0
+push constant 10
+call Math.divide 2
+pop local 0
+push local 1
+push constant 10
+call Math.divide 2
+pop local 1
+push this 7
+push constant 0
+gt
+if-goto IF_TRUE12
+goto IF_FALSE12
+label IF_TRUE12
+push this 10
+call DrawPoly.storePrev 1
+pop temp 0
+push this 10
+push this 6
+call DrawPoly.rotate 2
+pop temp 0
+push this 10
+push local 0
+push local 1
+call DrawPoly.translate 3
+pop temp 0
+push this 7
+push constant 1
+sub
+pop this 7
+push this 7
+push constant 0
+eq
+if-goto IF_TRUE13
+goto IF_FALSE13
+label IF_TRUE13
+push this 10
+call DrawPoly.erase 1
+pop temp 0
+label IF_FALSE13
+label IF_FALSE12
+push this 9
+call DrawPoly.storePrev 1
+pop temp 0
+push this 9
+push this 6
+call DrawPoly.rotate 2
+pop temp 0
+push this 9
+push local 0
+push local 1
+call DrawPoly.translate 3
+pop temp 0
+push this 3
+not
+if-goto IF_TRUE14
+goto IF_FALSE14
+label IF_TRUE14
+push this 10
+call DrawPoly.erase 1
+pop temp 0
+push this 9
+call DrawPoly.erase 1
+pop temp 0
+push this 12
+push this 0
+push constant 10
+call Math.divide 2
+push this 1
+push constant 10
+call Math.divide 2
+call StarBurst.init 3
+pop temp 0
+push constant 0
+not
+pop this 13
+label IF_FALSE14
+push constant 0
+return

@@ -1,0 +1,368 @@
+/**
+ * Implements GASteroids game.
+ *
+ * Gameplay:
+ *   The player controls a spaceship in an asteroid field. The goal is to
+ *   destroy asteroids and survive as long as possible.
+ *
+ *   The player can rotate the ship left and right, thrust forward, and fire
+ *   weapons to destroy asteroids. Large asteroids split into smaller asteroids
+ *   when hit. Small asteroids disappear when hit.
+ *
+ *   Colliding with an asteroid will destroy the player's ship. A new ship will
+ *   be granted after each death.
+ *
+ * Keyboard controls:
+ *   <space> - start game / spawn new ship / shoot weapon.
+ *   <left arrow> - rotate ship counter-clockwise.
+ *   <right arrow> - rotate ship clockwise.
+ *   <up arrow> - fire thrusters.
+ *   <-> - decrease frame delay (speed up game).
+ *   <+> - increase frame delay (slow down game).
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class GASteroids {
+    field int gameSpeed;
+    field int gameSpeedPrev;
+
+    field Ship ship;
+
+    field int numAsteroids;
+    field Array asteroids;
+
+    field int logo_width;
+    field int logo_height;
+    field Array logo;
+
+    field String blankSpace;
+
+    /**
+     * Constructor.
+     */
+    constructor GASteroids new() {
+        var int i;
+        var int j;
+        var Array fieldXY;
+
+        let gameSpeed = 15;     // Default 15ms delay.
+        let gameSpeedPrev = -1;
+
+        // Initialise libraries.
+        do Constant.init();
+        do Sinus.init();
+        do PRNG.seed(6427);
+
+        let fieldXY = Constant.getFieldXY();
+
+        // Initialise playing field to black!
+        do Screen.setColor(true);
+        //do Screen.drawRectangle(fieldXY[0] / 10, fieldXY[1] / 10, fieldXY[2] / 10, fieldXY[3] / 10);
+        do Screen.drawRectangle(0, 0, 511, 255);
+
+        // Draw playing field borders.
+        do Screen.setColor(false);
+        do Screen.drawLine(fieldXY[0] / 10, fieldXY[1] / 10, fieldXY[0] / 10, fieldXY[3] / 10);
+        do Screen.drawLine(fieldXY[2] / 10, fieldXY[1] / 10, fieldXY[2] / 10, fieldXY[3] / 10);
+
+        // Play with poke.
+        /*
+        do Screen.setColor(false);  // White
+        do Screen.drawLine(16, 250, 31, 250);
+        do Memory.poke( 16384 + ((512/16) * 252) + 1,  21845);
+        do Memory.poke( 16384 + ((512/16) * 254) + 1, -21846);
+        */
+
+        let logo = Array.new(64);
+
+        let logo_width = 2;
+        let logo_height = 32;
+        let logo[0] = -1;
+        let logo[1] = -1;
+        let logo[2] = -1;
+        let logo[3] = -1;
+        let logo[4] = -31769;
+        let logo[5] = -6205;
+        let logo[6] = -14349;
+        let logo[7] = -12313;
+        let logo[8] = -12429;
+        let logo[9] = -12569;
+        let logo[10] = -4237;
+        let logo[11] = -12561;
+        let logo[12] = -4237;
+        let logo[13] = -16145;
+        let logo[14] = -8077;
+        let logo[15] = -15378;
+        let logo[16] = -4237;
+        let logo[17] = -14386;
+        let logo[18] = -4237;
+        let logo[19] = -12402;
+        let logo[20] = -4237;
+        let logo[21] = -12530;
+        let logo[22] = -4493;
+        let logo[23] = -12561;
+        let logo[24] = -4493;
+        let logo[25] = -12561;
+        let logo[26] = -4237;
+        let logo[27] = -12562;
+        let logo[28] = -4125;
+        let logo[29] = -12306;
+        let logo[30] = -4637;
+        let logo[31] = -14386;
+        let logo[32] = -1;
+        let logo[33] = -1;
+        let logo[34] = -1;
+        let logo[35] = -1;
+        let logo[36] = 4295;
+        let logo[37] = -7663;
+        let logo[38] = 4227;
+        let logo[39] = -16111;
+        let logo[40] = 4243;
+        let logo[41] = -13935;
+        let logo[42] = 4243;
+        let logo[43] = -13936;
+        let logo[44] = 5363;
+        let logo[45] = -3696;
+        let logo[46] = 5251;
+        let logo[47] = -7408;
+        let logo[48] = 5267;
+        let logo[49] = -14576;
+        let logo[50] = 4243;
+        let logo[51] = -14448;
+        let logo[52] = -28525;
+        let logo[53] = -13934;
+        let logo[54] = -28525;
+        let logo[55] = -14062;
+        let logo[56] = -27517;
+        let logo[57] = -16110;
+        let logo[58] = -26969;
+        let logo[59] = -7662;
+        let logo[60] = -1;
+        let logo[61] = -1;
+        let logo[62] = -1;
+        let logo[63] = -1;
+
+        // Draw logo by poking 16bit words to screen memory.
+        let i = 0;
+        let j = 0;
+        while (i < (logo_height * logo_width)) {
+            do Memory.poke( 16384 + ((512/16) * (207 + j)) + 1,  logo[i]);
+            do Memory.poke( 16384 + ((512/16) * (207 + j)) + 2,  logo[i+1]);
+            let i = i + 2;
+            let j = j + 1;
+        }
+
+        // Setup stand in lives, score, speed area.
+        do Screen.setColor(false);
+        do Screen.drawRectangle(0, 40, 64, 144);
+
+        do Output.moveCursor(4, 0);
+        do Output.printString("Lives");
+
+        do Output.moveCursor(7, 0);
+        do Output.printString("Score");
+
+        do Output.moveCursor(10, 0);
+        do Output.printString("Speed");
+
+        let blankSpace = "       ";
+
+
+        // Setup a Ship.
+        let ship = Ship.new();
+
+        // Setup an array of Asteroids.
+        let numAsteroids = 5;
+        let asteroids = Array.new(numAsteroids);
+
+        let asteroids[0] = Asteroid.new(true);
+        let asteroids[1] = Asteroid.new(true);
+        let asteroids[2] = Asteroid.new(true);
+        let asteroids[3] = Asteroid.new(true);
+        let asteroids[4] = Asteroid.new(true);
+
+        // Setup score.
+        do Score.init(3);
+
+        return this;
+    }
+
+    /**
+     * Destructor.
+     */
+    method void dispose() {
+        var int i;
+        var Asteroid a;
+
+        let i = 0;
+	    while (i < numAsteroids) {
+	        let a = asteroids[i];
+	        do a.dispose();
+	        let i = i + 1;
+	    }
+
+	    do asteroids.dispose();
+	    do ship.dispose();
+	    do logo.dispose();
+
+        do Memory.deAlloc(this);
+
+        return;
+    }
+
+    /**
+     * Starts the game. Handles inputs from the user.
+     */
+    method void run() {
+        var int key;
+        var boolean timeToDie;
+
+        let timeToDie = false;
+
+        while (~timeToDie) {
+            // Loop while no key pressed.
+            while (key = 0) {
+                let key = Keyboard.keyPressed();
+                do gameTick(key);
+            }
+
+            // Catch 'q' as exit.
+            if (key = 81) {
+                let timeToDie = true;
+            }
+
+            // Debug code to find key code.
+            /*
+            do Output.moveCursor(0, 20);
+            do Output.printString("Key: ");
+            do Output.printInt(key);
+            do Output.printString("    ");
+            */
+
+            // Loop while key pressed.
+            while (~(key = 0)) {
+                let key = Keyboard.keyPressed();
+                do gameTick(key);
+            }
+        }
+
+        return;
+	}
+
+	/**
+	 * Performs one tick of the game engine.
+	 */
+	method void gameTick(int key) {
+	    var int i;
+	    var Asteroid a;
+
+	    // User input on ship.
+        if (key = 32) {             // Space
+            do ship.fireShot();
+        }
+	    if (key = 131) {            // Up
+            do ship.fireThruster();
+        }
+        if (key = 130) {            // Left
+            do ship.changeHeading(-10);
+        }
+        if (key = 132) {             // Right
+            do ship.changeHeading(10);
+        }
+
+        // Adjust game speed.
+        if (key = 43) {             // Plus
+            let gameSpeedPrev = gameSpeed;
+            let gameSpeed = gameSpeed + 1;
+            if (gameSpeed > 50) {
+                let gameSpeed = 50;
+            }
+        }
+        if (key = 45) {             // Minus
+            let gameSpeedPrev = gameSpeed;
+            let gameSpeed = gameSpeed - 1;
+            if (gameSpeed < 0) {
+                let gameSpeed = 0;
+            }
+        }
+
+        // Tick engine.
+
+	    let i = 0;
+	    while (i < numAsteroids) {
+	        let a = asteroids[i];
+	        do a.tick();
+	        let i = i + 1;
+	    }
+
+	    do ship.tick(asteroids, numAsteroids);
+
+
+        // Re-draw screen elements.
+
+	    // Asteroids
+	    let i = 0;
+	    while (i < numAsteroids) {
+	        let a = asteroids[i];
+	        do a.redraw();
+	        let i = i + 1;
+	    }
+
+	    // Ship
+	    do ship.redraw();
+
+	    // Score
+	    let i = Score.lifeChanged();
+	    if (~(i = -1)) {
+	        do Output.moveCursor(5, 0);
+	        do Output.printString(blankSpace);
+	        do Output.moveCursor(5, 0);
+	        do Output.printInt(i);
+	    }
+	    if (i = 0) {
+	        do Score.init(3);
+	    }
+
+	    let i = Score.scoreChanged();
+	    if (~(i = -1)) {
+	        do Output.moveCursor(8, 0);
+	        do Output.printString(blankSpace);
+	        do Output.moveCursor(8, 0);
+	        do Output.printInt(i);
+	    }
+
+	    // Print game speed.
+	    if (~ (gameSpeed = gameSpeedPrev)) {
+	        do Output.moveCursor(11, 0);
+	        do Output.printString(blankSpace);
+	        do Output.moveCursor(11, 0);
+	        do Output.printInt(gameSpeed);
+	        let gameSpeedPrev = gameSpeed;
+	    }
+
+	    do Sys.wait(gameSpeed);
+	    //do Sys.wait(500);     // Debug speed
+
+	    return;
+	}
+}

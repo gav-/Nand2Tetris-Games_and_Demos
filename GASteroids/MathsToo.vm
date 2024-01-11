@@ -1,0 +1,11 @@
+function MathsToo.mod 1
+push argument 0
+push argument 1
+call Math.divide 2
+pop local 0
+push argument 0
+push argument 1
+push local 0
+call Math.multiply 2
+sub
+return

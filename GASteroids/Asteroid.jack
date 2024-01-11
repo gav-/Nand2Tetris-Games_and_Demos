@@ -1,0 +1,339 @@
+/**
+ * GASteroids Asteroid class.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class Asteroid {
+    // WARNING: x, y, r and healthy must be the first four fields, OR ELSE!
+
+    // Coordinates in one decimal place fixed point (* 10)
+    field int x;
+    field int y;
+
+    // Radius for collision detection.
+    field int r;
+
+    // True if asteroid is currently whole.
+    field boolean healthy;
+
+    // How long till we spawn
+    field int tickSpawn;
+
+    // Velocity.
+    field int xVel;
+    field int yVel;
+
+    field DrawPoly poly;
+
+    field StarBurst burst;
+
+    // Is StarBurst active ?
+    field boolean burstActive;
+
+    // Is this a large parent asteroid ?
+    field boolean parent;
+
+    // An asteroid may break into child asteroids when destroyed.
+    field int numChildren;
+    field Array children;
+
+    // Array reference to Constant.fieldXY, do not dispose.
+    field Array fieldXY;
+
+    constructor Asteroid new (boolean setParent) {
+        var int i;
+        let parent = setParent;
+        let fieldXY = Constant.getFieldXY();
+
+        // Large asteroid.
+        let poly = DrawPoly.new(11);
+        do poly.push(  4, -12);
+        do poly.push( 12,  -3);
+        do poly.push( 12,   3);
+        do poly.push(  4,  12);
+        do poly.push( -2,  12);
+        do poly.push( -2,   3);
+        do poly.push( -8,  12);
+        do poly.push(-12,   3);
+        do poly.push( -7,   0);
+        do poly.push(-12,  -2);
+        do poly.push( -4, -12);
+
+        // Pick a random rotation.
+        do poly.initTransform(1);
+        do poly.rotate(PRNG.rand(359));
+
+        if (parent) {    // We are a large parent asteroid.
+            // Scale up by 3/2
+            do poly.scale(3, 2, 3, 2);
+
+            let numChildren = PRNG.rand(1) + 2;    // Range 2..3
+            let children = Array.new(numChildren);
+            let i = 0;
+            while (i < numChildren) {
+                let children[i] = Asteroid.new(false);
+                let i = i + 1;
+            }
+        } else {        // We are a small child asteroid.
+            // Scale down to 2/3.
+            do poly.scale(2, 3, 2, 3);
+        }
+
+        do poly.storeMaster();
+        do poly.initTransform(0);
+
+        let r = (poly.getMax() + 1) * 10;
+
+        let burst = StarBurst.new((r/10) - 1, 4);
+
+        return this;
+    }
+
+    method void dispose() {
+        var int i;
+        var Asteroid a;
+
+        do poly.dispose();
+        do burst.dispose();
+
+        while (i < numChildren) {
+            let a = children[i];
+            do a.dispose();
+            let i = i + 1;
+        }
+        if (~(children = 0)) {
+            do children.dispose();
+        }
+
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /**
+     * Determines if there was a collision between object parameters and
+     * this Asteroid or any child Asteroids.
+     *
+     * Returns a reference to the collision Asteroid, or false (0) otherwise.
+     */
+    method Asteroid collision (int oX, int oY, int oR) {
+        var int d;
+        var int i;
+        var Asteroid a;
+
+        if (healthy) {
+            let d = r + oR - 1;      // Asteroid radius + parameter radius
+            if (Math.abs(x - oX) < d) {
+                if (Math.abs(y - oY) < d) {
+                    return this;
+                }
+            }
+        } else {                    // Unhealthy, so check children.
+            while (i < numChildren) {
+                let a = children[i];
+                if (a[3]) {         // This child is healthy
+                    if (a.collision(oX, oY, oR)) {
+                        return a;
+                    }
+                }
+                let i = i + 1;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Called when asteroid is destroyed by torpedo.
+     */
+    method void destroyed() {
+        var int i;
+        var Asteroid a;
+
+        do poly.erase();
+        do poly.initTransform(0);   // Prevent flicker when respawned.
+
+        let healthy = false;
+
+        // Spawn children now.
+        while (i < numChildren) {
+            let a = children[i];
+            do a.setXY(x, y);       // Inherit parent coordinates.
+            do a.spawn();           // Happy Birthday !
+            let i = i + 1;
+        }
+
+        // Spawn a star burst now.
+        do burst.init(x/10, y/10);
+        let burstActive = true;
+
+        if (parent) {
+            // Set a respawn delay for us when all children destroyed.
+            let tickSpawn = PRNG.rand(50) + 50;     // Range 50..100
+        }
+
+        return;
+    }
+
+    /**
+     * Redraw asteroid or any children.
+     */
+    method void redraw() {
+        var int i;
+        var Asteroid a;
+
+        if (healthy) {
+            do poly.redraw();
+        } else {
+            while (i < numChildren) {
+                let a = children[i];
+                do a.redraw();
+                let i = i + 1;
+            }
+            if (burstActive) {
+                do burst.redraw();
+            }
+        }
+
+        return;
+    }
+
+    /**
+     * Parent asteroids set the position when spawning child asteroids.
+     */
+    method void setXY (int setX, int setY) {
+        let x = setX;
+        let y = setY;
+        return;
+    }
+
+    /**
+     * Spawn an asteroid with position and velocity.
+     */
+    method void spawn() {
+
+        // Random velocities.
+        if (parent) {    // Large asteroids are slow.
+            let xVel = PRNG.rand(7) + 5;   // Range 5..12
+            let yVel = PRNG.rand(7) + 5;   // Range 5..12
+        } else {        // Small asteroids are fast.
+            let xVel = PRNG.rand(9) + 9;   // Range 9..18
+            let yVel = PRNG.rand(9) + 9;   // Range 9..18
+        }
+        if (PRNG.rand(1)) {             // 50% chance opposite direction
+            let xVel = -xVel;
+        }
+        if (PRNG.rand(1)) {             // 50% chance opposite direction
+            let yVel = -yVel;
+        }
+
+        if (parent) {
+            // Large parent asteroids spawn randomly along screen edges
+            // (like arcade game).
+            let x = fieldXY[0] + r;     // field x1
+            let y = fieldXY[1] + r;     // field y1
+
+            // 50% chance x or y edge.
+            if (PRNG.rand(1)) {
+                let x = x + PRNG.rand(fieldXY[2] - x);
+                if (yVel < 0) {         // Flip side for negative velocity
+                    let y = fieldXY[3] - r;
+                }
+            } else {
+                let y = y + PRNG.rand(fieldXY[3] - y);
+                if (xVel < 0) {         // Flip side for negative velocity
+                    let x = fieldXY[2] - r;
+                }
+            }
+        } else {
+            // Small child asteroids spawn at coordinates set by parent.
+        }
+
+        let healthy = true;
+
+        return;
+    }
+
+    /**
+     * Tick the asteroid game mechanics.
+     */
+    method void tick() {
+        var int i;
+        var Asteroid a;
+        var boolean healthyChild;
+
+       // StarBurst sequence.
+        if (burstActive) {
+            let burstActive = burst.tick();
+        }
+
+        // Tick children
+        while (i < numChildren) {
+            let a = children[i];
+            do a.tick();
+            if (a[3]) {                 // Note that a child is still healthy.
+                let healthyChild = true;
+            }
+            let i = i + 1;
+        }
+
+        if (~ healthy) {
+            if (healthyChild) {         // We do nothing.
+                return;
+            }
+
+            // No remaining healthy children.
+            if (tickSpawn) {
+                let tickSpawn = tickSpawn - 1;
+            } else {
+                if (parent) {
+                    do spawn();         // (re)spawn this parent asteroid.
+                }
+            }
+        } else {
+            let x = x + xVel;
+            let y = y + yVel;
+
+            // Check bounds and wrap on screen.
+            if (x < (fieldXY[0] + r)) {
+                let x = fieldXY[2] - r;
+            } else {
+                if (x > (fieldXY[2] - r)) {
+                    let x = fieldXY[0] + r;
+                }
+            }
+
+            if (y < (fieldXY[1] + r)) {
+                let y = fieldXY[3] - r;
+            } else {
+                if (y > (fieldXY[3] - r)) {
+                    let y = fieldXY[1] + r;
+                }
+            }
+
+            do poly.storePrev();
+            do poly.translate(x / 10, y / 10);
+        }
+
+        return;
+    }
+}

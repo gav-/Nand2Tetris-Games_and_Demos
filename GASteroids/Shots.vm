@@ -1,0 +1,549 @@
+function Shots.new 0
+push constant 15
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+pop this 0
+call Constant.getFieldXY 0
+pop this 14
+push constant 1
+push constant 10
+call Math.multiply 2
+pop this 1
+push constant 25
+pop this 5
+push constant 4
+pop this 6
+push constant 8
+pop this 7
+push this 0
+call Array.new 1
+pop this 2
+push this 0
+call Array.new 1
+pop this 8
+push this 0
+call Array.new 1
+pop this 9
+push this 0
+call Array.new 1
+pop this 10
+push this 0
+call Array.new 1
+pop this 11
+push this 0
+call Array.new 1
+pop this 12
+push this 0
+call Array.new 1
+pop this 13
+push pointer 0
+return
+function Shots.dispose 0
+push argument 0
+pop pointer 0
+push this 2
+call Array.dispose 1
+pop temp 0
+push this 8
+call Array.dispose 1
+pop temp 0
+push this 9
+call Array.dispose 1
+pop temp 0
+push this 10
+call Array.dispose 1
+pop temp 0
+push this 11
+call Array.dispose 1
+pop temp 0
+push this 12
+call Array.dispose 1
+pop temp 0
+push this 13
+call Array.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function Shots.fire 0
+push argument 0
+pop pointer 0
+push this 3
+push this 2
+add
+pop pointer 1
+push that 0
+push constant 0
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
+push this 5
+push this 4
+push this 2
+add
+pop pointer 1
+push that 0
+sub
+push this 6
+lt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 0
+return
+label IF_FALSE1
+push this 3
+push this 2
+add
+push this 5
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 3
+push this 8
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 3
+push this 9
+add
+push argument 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 3
+push this 10
+add
+push argument 3
+push argument 5
+call Sinus.sin 1
+push constant 10
+call Math.divide 2
+push this 7
+call Math.multiply 2
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 3
+push this 11
+add
+push argument 4
+push argument 5
+call Sinus.cos 1
+push constant 10
+call Math.divide 2
+push this 7
+call Math.multiply 2
+sub
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 3
+pop this 4
+push this 3
+push constant 1
+add
+pop this 3
+push this 3
+push this 0
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 0
+pop this 3
+label IF_FALSE2
+push constant 0
+return
+function Shots.redraw 1
+push argument 0
+pop pointer 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push this 0
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 2
+add
+pop pointer 1
+push that 0
+push constant 0
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 0
+push this 12
+add
+pop pointer 1
+push that 0
+push constant 10
+call Math.divide 2
+push local 0
+push this 13
+add
+pop pointer 1
+push that 0
+push constant 10
+call Math.divide 2
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push constant 0
+pop local 0
+label WHILE_EXP1
+push local 0
+push this 0
+lt
+not
+if-goto WHILE_END1
+push local 0
+push this 2
+add
+pop pointer 1
+push that 0
+push constant 0
+gt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 0
+push this 8
+add
+pop pointer 1
+push that 0
+push constant 10
+call Math.divide 2
+push local 0
+push this 9
+add
+pop pointer 1
+push that 0
+push constant 10
+call Math.divide 2
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE1
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP1
+label WHILE_END1
+push constant 0
+return
+function Shots.tick 5
+push argument 0
+pop pointer 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push this 0
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 2
+add
+pop pointer 1
+push that 0
+push constant 0
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 0
+push this 2
+add
+push local 0
+push this 2
+add
+pop pointer 1
+push that 0
+push constant 1
+sub
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push this 2
+add
+pop pointer 1
+push that 0
+push constant 0
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 0
+push this 8
+add
+pop pointer 1
+push that 0
+push constant 10
+call Math.divide 2
+push local 0
+push this 9
+add
+pop pointer 1
+push that 0
+push constant 10
+call Math.divide 2
+call Screen.drawPixel 2
+pop temp 0
+push constant 0
+return
+label IF_FALSE1
+push local 0
+push this 8
+add
+pop pointer 1
+push that 0
+push local 0
+push this 10
+add
+pop pointer 1
+push that 0
+add
+pop local 1
+push local 0
+push this 9
+add
+pop pointer 1
+push that 0
+push local 0
+push this 11
+add
+pop pointer 1
+push that 0
+add
+pop local 2
+push local 1
+push constant 0
+push this 14
+add
+pop pointer 1
+push that 0
+push this 1
+add
+lt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 2
+push this 14
+add
+pop pointer 1
+push that 0
+push this 1
+sub
+pop local 1
+goto IF_END2
+label IF_FALSE2
+push local 1
+push constant 2
+push this 14
+add
+pop pointer 1
+push that 0
+push this 1
+sub
+gt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 0
+push this 14
+add
+pop pointer 1
+push that 0
+push this 1
+add
+pop local 1
+label IF_FALSE3
+label IF_END2
+push local 2
+push constant 1
+push this 14
+add
+pop pointer 1
+push that 0
+push this 1
+add
+lt
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 3
+push this 14
+add
+pop pointer 1
+push that 0
+push this 1
+sub
+pop local 2
+goto IF_END4
+label IF_FALSE4
+push local 2
+push constant 3
+push this 14
+add
+pop pointer 1
+push that 0
+push this 1
+sub
+gt
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push constant 1
+push this 14
+add
+pop pointer 1
+push that 0
+push this 1
+add
+pop local 2
+label IF_FALSE5
+label IF_END4
+push local 0
+push this 12
+add
+push local 0
+push this 8
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push this 13
+add
+push local 0
+push this 9
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push this 8
+add
+push local 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push this 9
+add
+push local 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+pop local 3
+label WHILE_EXP1
+push local 3
+push argument 2
+lt
+not
+if-goto WHILE_END1
+push local 3
+push argument 1
+add
+pop pointer 1
+push that 0
+pop local 4
+push local 4
+push local 0
+push this 8
+add
+pop pointer 1
+push that 0
+push local 0
+push this 9
+add
+pop pointer 1
+push that 0
+push this 1
+call Asteroid.collision 4
+pop local 4
+push local 4
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 10
+call Score.changeScore 1
+pop temp 0
+push local 4
+call Asteroid.destroyed 1
+pop temp 0
+push local 0
+push this 2
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE6
+push local 3
+push constant 1
+add
+pop local 3
+goto WHILE_EXP1
+label WHILE_END1
+label IF_FALSE0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return

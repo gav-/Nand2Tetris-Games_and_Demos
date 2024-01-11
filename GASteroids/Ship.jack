@@ -1,0 +1,327 @@
+/**
+ * GASteroids Ship class.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class Ship {
+    // Coordinates in one decimal place fixed point (* 10)
+    field int x;
+    field int y;
+
+    // Ship radius (for collision calculations)
+    field int r;
+
+    // True is ship is currently functional.
+    field boolean healthy;
+
+    // Velocity.
+    field int xVel;
+    field int yVel;
+
+    // Heading in degrees.
+    field int heading;
+
+    // Set to count down ticks when thruster flame should turn off.
+    field int flameOn;
+
+    // Set to grace period on death. Prevents rapid respawning under Asteroid at
+    // center of screen. Also prevents accidental firing on respawn.
+    field int tickGrace;
+
+    field DrawPoly poly;
+    field DrawPoly flame;
+
+    field Shots shots;
+
+    field StarBurst burst;
+
+    // Is StarBurst active ?
+    field boolean burstActive;
+
+    // Array reference to Constant.fieldXY
+    field Array fieldXY;
+
+    constructor Ship new() {
+        let fieldXY = Constant.getFieldXY();
+
+        // Radius
+        let r = 8 * 10;
+
+        // Ship vertices (0,0 at centre).
+        let poly = DrawPoly.new(5);
+        do poly.push(  0, -6);
+        do poly.push(  4,  6);
+        do poly.push(  2,  3);
+        do poly.push( -2,  3);
+        do poly.push( -4,  6);
+
+        // Flame vertices (relative to poly ship).
+        let flame = DrawPoly.new(3);
+        do flame.push(2,3);
+        do flame.push(0,6);
+        do flame.push(-2,3);
+
+        let shots = Shots.new(4);
+
+        let burst = StarBurst.new(r/10 - 1, 4);
+
+        return this;
+    }
+
+    method void dispose() {
+        do poly.dispose();
+        do flame.dispose();
+        do shots.dispose();
+        do burst.dispose();
+
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void fireShot() {
+        if (tickGrace) {    // Prevents respawning too fast, and accidentally
+            return;         // firing on respawn.
+        }
+        if (healthy) {
+            do shots.fire(x, y, xVel, yVel, heading);
+        } else {
+            do spawn();
+        }
+        return;
+    }
+
+    method void fireThruster() {
+        var int tmpX;
+        var int tmpY;
+
+        // Sinus is two decimal places fixed point (* 100), we store
+        // velocities as one decimal place fixed point (* 10).
+        let tmpX = Sinus.sin(heading);
+        let tmpY = Sinus.cos(heading);
+
+        // Adjust for rounding.
+        if (tmpX < 0) {
+            let tmpX = tmpX - 5;
+        } else {
+            if (tmpX > 0) {
+                let tmpX = tmpX + 5;
+            }
+        }
+
+        if (tmpY < 0) {
+            let tmpY = tmpY - 5;
+        } else {
+            if (tmpY > 0) {
+                let tmpY = tmpY + 5;
+            }
+        }
+
+        // Note that zero degrees heading is straight up.
+        let xVel = xVel + (tmpX / 10);
+        let yVel = yVel - (tmpY / 10);
+
+        // clamp values at maximums.
+        if (xVel < -100) {
+            let xVel = -100;
+        } else {
+            if (xVel > 100) {
+                let xVel = 100;
+            }
+        }
+
+        if (yVel < -100) {
+            let yVel = -100;
+        } else {
+            if (yVel > 100) {
+                let yVel = 100;
+            }
+        }
+
+        // Set flame on tick counter.
+        let flameOn = 7;
+
+        return;
+    }
+
+    /**
+     * Change ships heading.
+     *
+     * dA must be <360 and >-360
+     */
+    method void changeHeading(int dA) {
+        let heading = heading + dA;
+
+        // Ensure 0 <= heading < 360
+        if (heading < 0) {
+            let heading = 360 + heading;
+        } else {
+            if (heading > 359) {
+                let heading = heading - 360;
+            }
+        }
+
+        return;
+    }
+
+    method void redraw() {
+        do shots.redraw();
+
+        if (healthy) {
+            if (flameOn > 0) {
+                do flame.redraw();
+            }
+            do poly.redraw();
+        } else {
+            if (burstActive) {
+                do burst.redraw();
+            }
+        }
+
+        return;
+    }
+
+    method void spawn () {
+        // Ship spawns at centre of screen.
+        let x = fieldXY[2] / 2;
+        let y = fieldXY[3] / 2;
+        let xVel = 0;
+        let yVel = 0;
+        let heading = 0;
+        let flameOn = 0;
+        let healthy = true;
+        let tickGrace = 10;     // Prevent torpedo fire on respawn.
+        return;
+    }
+
+    method void tick(Array asteroids, int numAsteroids) {
+        var int tmpX;
+        var int tmpY;
+        var int i;
+        var Asteroid a;
+
+        // Calculate shots.
+        do shots.tick(asteroids, numAsteroids);
+
+        // StarBurst sequence.
+        if (burstActive) {
+            let burstActive = burst.tick();
+        }
+
+        // Decrement any grace periods.
+        if (tickGrace) {
+            let tickGrace = tickGrace - 1;
+        }
+
+        if (~ healthy) {    // Only continue if healthy.
+            return;
+        }
+
+        // Move
+        let x = x + xVel;
+        let y = y + yVel;
+
+        // Check bounds and wrap on screen.
+        if (x < (fieldXY[0] + r)) {
+            let x = fieldXY[2] - r;
+        } else {
+            if (x > (fieldXY[2] - r)) {
+                let x = fieldXY[0] + r;
+            }
+        }
+
+        if (y < (fieldXY[1] + r)) {
+            let y = fieldXY[3] - r;
+        } else {
+            if (y > (fieldXY[3] - r)) {
+                let y = fieldXY[1] + r;
+            }
+        }
+
+        // Check for asteroid collisions.
+        let i = 0;
+        while (i < numAsteroids) {
+            let a = asteroids[i];
+            if (a.collision(x, y, r)) {
+                // Ship/Asteroid collision.
+                do Score.changeLife(-1);
+                let healthy = false;
+                let tickGrace = 10;
+            }
+            let i = i + 1;
+        }
+
+        // Scale fixed point Position coordinates to screen space.
+
+        let tmpX = x;
+        let tmpY = y;
+
+        // Adjust for rounding.
+        if (tmpX < 0) {
+            let tmpX = tmpX - 5;
+        } else {
+            if (tmpX > 0) {
+                let tmpX = tmpX + 5;
+            }
+        }
+
+        if (tmpY < 0) {
+            let tmpY = tmpY - 5;
+        } else {
+            if (tmpY > 0) {
+                let tmpY = tmpY + 5;
+            }
+        }
+
+        let tmpX = tmpX / 10;
+        let tmpY = tmpY / 10;
+
+        // Store, rotate and translate coordinates.
+
+        // See if thruster flame is on.
+        if (flameOn > 0) {
+            do flame.storePrev();
+            do flame.rotate(heading);
+            do flame.translate(tmpX, tmpY);
+            let flameOn = flameOn - 1;
+
+            // If flame should now be off, erase last drawn to screen.
+            if (flameOn = 0) {
+                do flame.erase();
+            }
+        }
+
+        do poly.storePrev();
+        do poly.rotate(heading);
+        do poly.translate(tmpX, tmpY);
+
+        if (~ healthy) {
+            do flame.erase();
+            do poly.erase();
+            // Spawn a star burst now.
+            do burst.init(x/10, y/10);
+            let burstActive = true;
+        }
+
+        return;
+    }
+
+}

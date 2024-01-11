@@ -1,0 +1,725 @@
+function Asteroid.new 1
+push constant 14
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+pop this 10
+call Constant.getFieldXY 0
+pop this 13
+push constant 11
+call DrawPoly.new 1
+pop this 7
+push this 7
+push constant 4
+push constant 12
+neg
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 12
+push constant 3
+neg
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 12
+push constant 3
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 4
+push constant 12
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 2
+neg
+push constant 12
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 2
+neg
+push constant 3
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 8
+neg
+push constant 12
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 12
+neg
+push constant 3
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 7
+neg
+push constant 0
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 12
+neg
+push constant 2
+neg
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 4
+neg
+push constant 12
+neg
+call DrawPoly.push 3
+pop temp 0
+push this 7
+push constant 1
+call DrawPoly.initTransform 2
+pop temp 0
+push this 7
+push constant 359
+call PRNG.rand 1
+call DrawPoly.rotate 2
+pop temp 0
+push this 10
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 7
+push constant 3
+push constant 2
+push constant 3
+push constant 2
+call DrawPoly.scale 5
+pop temp 0
+push constant 1
+call PRNG.rand 1
+push constant 2
+add
+pop this 11
+push this 11
+call Array.new 1
+pop this 12
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push this 11
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 12
+add
+push constant 0
+call Asteroid.new 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+goto IF_END0
+label IF_FALSE0
+push this 7
+push constant 2
+push constant 3
+push constant 2
+push constant 3
+call DrawPoly.scale 5
+pop temp 0
+label IF_END0
+push this 7
+call DrawPoly.storeMaster 1
+pop temp 0
+push this 7
+push constant 0
+call DrawPoly.initTransform 2
+pop temp 0
+push this 7
+call DrawPoly.getMax 1
+push constant 1
+add
+push constant 10
+call Math.multiply 2
+pop this 2
+push this 2
+push constant 10
+call Math.divide 2
+push constant 1
+sub
+push constant 4
+call StarBurst.new 2
+pop this 8
+push pointer 0
+return
+function Asteroid.dispose 2
+push argument 0
+pop pointer 0
+push this 7
+call DrawPoly.dispose 1
+pop temp 0
+push this 8
+call StarBurst.dispose 1
+pop temp 0
+label WHILE_EXP0
+push local 0
+push this 11
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 12
+add
+pop pointer 1
+push that 0
+pop local 1
+push local 1
+call Asteroid.dispose 1
+pop temp 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push this 12
+push constant 0
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 12
+call Array.dispose 1
+pop temp 0
+label IF_FALSE0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function Asteroid.collision 3
+push argument 0
+pop pointer 0
+push this 3
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 2
+push argument 3
+add
+push constant 1
+sub
+pop local 0
+push this 0
+push argument 1
+sub
+call Math.abs 1
+push local 0
+lt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 1
+push argument 2
+sub
+call Math.abs 1
+push local 0
+lt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push pointer 0
+return
+label IF_FALSE2
+label IF_FALSE1
+goto IF_END0
+label IF_FALSE0
+label WHILE_EXP0
+push local 1
+push this 11
+lt
+not
+if-goto WHILE_END0
+push local 1
+push this 12
+add
+pop pointer 1
+push that 0
+pop local 2
+push constant 3
+push local 2
+add
+pop pointer 1
+push that 0
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push local 2
+push argument 1
+push argument 2
+push argument 3
+call Asteroid.collision 4
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push local 2
+return
+label IF_FALSE4
+label IF_FALSE3
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
+label IF_END0
+push constant 0
+return
+function Asteroid.destroyed 2
+push argument 0
+pop pointer 0
+push this 7
+call DrawPoly.erase 1
+pop temp 0
+push this 7
+push constant 0
+call DrawPoly.initTransform 2
+pop temp 0
+push constant 0
+pop this 3
+label WHILE_EXP0
+push local 0
+push this 11
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 12
+add
+pop pointer 1
+push that 0
+pop local 1
+push local 1
+push this 0
+push this 1
+call Asteroid.setXY 3
+pop temp 0
+push local 1
+call Asteroid.spawn 1
+pop temp 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push this 8
+push this 0
+push constant 10
+call Math.divide 2
+push this 1
+push constant 10
+call Math.divide 2
+call StarBurst.init 3
+pop temp 0
+push constant 0
+not
+pop this 9
+push this 10
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 50
+call PRNG.rand 1
+push constant 50
+add
+pop this 4
+label IF_FALSE0
+push constant 0
+return
+function Asteroid.redraw 2
+push argument 0
+pop pointer 0
+push this 3
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 7
+call DrawPoly.redraw 1
+pop temp 0
+goto IF_END0
+label IF_FALSE0
+label WHILE_EXP0
+push local 0
+push this 11
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 12
+add
+pop pointer 1
+push that 0
+pop local 1
+push local 1
+call Asteroid.redraw 1
+pop temp 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push this 9
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 8
+call StarBurst.redraw 1
+pop temp 0
+label IF_FALSE1
+label IF_END0
+push constant 0
+return
+function Asteroid.setXY 0
+push argument 0
+pop pointer 0
+push argument 1
+pop this 0
+push argument 2
+pop this 1
+push constant 0
+return
+function Asteroid.spawn 0
+push argument 0
+pop pointer 0
+push this 10
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 7
+call PRNG.rand 1
+push constant 5
+add
+pop this 5
+push constant 7
+call PRNG.rand 1
+push constant 5
+add
+pop this 6
+goto IF_END0
+label IF_FALSE0
+push constant 9
+call PRNG.rand 1
+push constant 9
+add
+pop this 5
+push constant 9
+call PRNG.rand 1
+push constant 9
+add
+pop this 6
+label IF_END0
+push constant 1
+call PRNG.rand 1
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 5
+neg
+pop this 5
+label IF_FALSE1
+push constant 1
+call PRNG.rand 1
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 6
+neg
+pop this 6
+label IF_FALSE2
+push this 10
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 0
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+add
+pop this 0
+push constant 1
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+add
+pop this 1
+push constant 1
+call PRNG.rand 1
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push this 0
+push constant 2
+push this 13
+add
+pop pointer 1
+push that 0
+push this 0
+sub
+call PRNG.rand 1
+add
+pop this 0
+push this 6
+push constant 0
+lt
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push constant 3
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+pop this 1
+label IF_FALSE5
+goto IF_END4
+label IF_FALSE4
+push this 1
+push constant 3
+push this 13
+add
+pop pointer 1
+push that 0
+push this 1
+sub
+call PRNG.rand 1
+add
+pop this 1
+push this 5
+push constant 0
+lt
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 2
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+pop this 0
+label IF_FALSE6
+label IF_END4
+goto IF_END3
+label IF_FALSE3
+label IF_END3
+push constant 0
+not
+pop this 3
+push constant 0
+return
+function Asteroid.tick 3
+push argument 0
+pop pointer 0
+push this 9
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 8
+call StarBurst.tick 1
+pop this 9
+label IF_FALSE0
+label WHILE_EXP0
+push local 0
+push this 11
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 12
+add
+pop pointer 1
+push that 0
+pop local 1
+push local 1
+call Asteroid.tick 1
+pop temp 0
+push constant 3
+push local 1
+add
+pop pointer 1
+push that 0
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 0
+not
+pop local 2
+label IF_FALSE1
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push this 3
+not
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push local 2
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 0
+return
+label IF_FALSE3
+push this 4
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push this 4
+push constant 1
+sub
+pop this 4
+goto IF_END4
+label IF_FALSE4
+push this 10
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push pointer 0
+call Asteroid.spawn 1
+pop temp 0
+label IF_FALSE5
+label IF_END4
+goto IF_END2
+label IF_FALSE2
+push this 0
+push this 5
+add
+pop this 0
+push this 1
+push this 6
+add
+pop this 1
+push this 0
+push constant 0
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+add
+lt
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 2
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+pop this 0
+goto IF_END6
+label IF_FALSE6
+push this 0
+push constant 2
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+gt
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push constant 0
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+add
+pop this 0
+label IF_FALSE7
+label IF_END6
+push this 1
+push constant 1
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+add
+lt
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push constant 3
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+pop this 1
+goto IF_END8
+label IF_FALSE8
+push this 1
+push constant 3
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+sub
+gt
+if-goto IF_TRUE9
+goto IF_FALSE9
+label IF_TRUE9
+push constant 1
+push this 13
+add
+pop pointer 1
+push that 0
+push this 2
+add
+pop this 1
+label IF_FALSE9
+label IF_END8
+push this 7
+call DrawPoly.storePrev 1
+pop temp 0
+push this 7
+push this 0
+push constant 10
+call Math.divide 2
+push this 1
+push constant 10
+call Math.divide 2
+call DrawPoly.translate 3
+pop temp 0
+label IF_END2
+push constant 0
+return

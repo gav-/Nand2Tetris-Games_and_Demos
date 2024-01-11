@@ -1,0 +1,165 @@
+/**
+ * GASteroids StarBurst class
+ *
+ * Provides an animated star-shaped burst of particles, good for
+ * destruction of objects.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class StarBurst {
+    field int x;
+    field int y;
+
+    // StarBurst radius
+    field int r;
+    field int r1;       // Diagonal particles current radius.
+    field int r2;       // Axis aligned particles current radius.
+
+    // How long is the sequence ?
+    field int ticks;
+
+    // Size of step that particles move in each tick.
+    field int sizeStep;
+
+    // How long before we start r2 ?
+    field int tickStartR2;
+
+    /**
+     * StarBurst constructor.
+     *
+     * No pixel will be drawn outside of provided radius !
+     *
+     * Animation sequence completed in provided ticks + 2 (for erase).
+     */
+    constructor StarBurst new (int radius, int setTicks) {
+        let r = radius;
+        let ticks = setTicks;
+        let sizeStep = radius / ticks;
+        if (sizeStep < 1) {
+            let sizeStep = 1;
+        }
+        return this;
+    }
+
+    method void dispose () {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /**
+     * Initialise StarBurst to beginning of sequence.
+     *
+     * setX, setY are in screen space coordinates.
+     */
+    method void init (int setX, int setY) {
+        let x = setX;
+        let y = setY;
+        let r1 = sizeStep;
+        let r2 = 0;
+        let tickStartR2 = (ticks / 2);
+        return;
+    }
+
+    /**
+     * Redraw. Called every tick that sequence is active.
+     */
+    method void redraw() {
+        var int prevR;
+
+        if (r1) {
+            // Erase diagonal particles.
+            let prevR = r1 - sizeStep;
+            do Screen.setColor(true);
+            do Screen.drawPixel( x + prevR, y + prevR);
+            do Screen.drawPixel( x + prevR, y - prevR);
+            do Screen.drawPixel( x - prevR, y - prevR);
+            do Screen.drawPixel( x - prevR, y + prevR);
+
+            // Draw diagonal particles.
+            if (r1 < r) {
+                do Screen.setColor(false);
+                do Screen.drawPixel( x + r1,    y + r1);
+                do Screen.drawPixel( x + r1,    y - r1);
+                do Screen.drawPixel( x - r1,    y - r1);
+                do Screen.drawPixel( x - r1,    y + r1);
+            }
+        }
+
+        if (r2) {
+            // Erase vertical/horizontal particles.
+            let prevR = r2 - sizeStep;
+            do Screen.setColor(true);
+            do Screen.drawPixel( x,         y + prevR);
+            do Screen.drawPixel( x + prevR, y        );
+            do Screen.drawPixel( x,         y - prevR);
+            do Screen.drawPixel( x - prevR, y        );
+
+            // Draw vertical/horizontal particles.
+            if (r2 < r) {
+                do Screen.setColor(false);
+                do Screen.drawPixel( x,         y + r2);
+                do Screen.drawPixel( x + r2,    y     );
+                do Screen.drawPixel( x,         y - r2);
+                do Screen.drawPixel( x - r2,    y     );
+            }
+        }
+
+        return;
+    }
+
+    /**
+     * Tick StarBurst animation sequence.
+     *
+     * Returns false when sequence complete.
+     */
+     method boolean tick () {
+        if (r1 = 0) {
+            if (r2 = 0) {
+                return false;               // All finished.
+            }
+        }
+
+        if (r1) {
+            let r1 = r1 + sizeStep;
+            if ( (r1 - r) > sizeStep ) {
+                let r1 = 0;                 // Allows r1 > r once for erase.
+            }
+        }
+
+        if (r2) {
+            let r2 = r2 + sizeStep;
+            if ( (r2 - r) > sizeStep ) {
+                let r2 = 0;                 // Allows r2 > r once for erase.
+            }
+        }
+
+        if (tickStartR2 > 0) {
+            let tickStartR2 = tickStartR2 - 1;
+            if (tickStartR2 = 0) {          // OK for r2 sequence to start.
+                let r2 = sizeStep;
+            }
+        }
+
+        return true;
+     }
+
+}

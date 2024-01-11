@@ -1,0 +1,292 @@
+/**
+ * Draw(able)Poly(gon) class.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ class DrawPoly {
+
+    field int numVertices;
+
+    // Head of polygon vertices array for push()
+    field int head;
+
+    // Master polygon vertices arrays. Usually centred on 0,0. This defines
+    // the polygon's shape before any transformations are applied.
+    field Array vX;
+    field Array vY;
+
+    // Transformed vertices (rotation, world space, etc).
+    // Two sets are used:
+    //  - Current transformation, built prior to drawing to screen.
+    //  - Previous transformation, to erase the previous from screen.
+    field Array aTX;
+    field Array aTY;
+    field Array bTX;
+    field Array bTY;
+
+    // References to the current and previous transformed vertices.
+    // This allows an easy swap, without needing an array copy.
+    field boolean current;  // false == aTX, aTY
+    field Array currTX;
+    field Array currTY;
+    field Array prevTX;
+    field Array prevTY;
+
+    /** Constructor */
+    constructor DrawPoly new (int vNum) {
+        let numVertices = vNum;
+        let head = 0;
+
+        let vX = Array.new(vNum);
+        let vY = Array.new(vNum);
+
+        let aTX = Array.new(vNum);
+        let aTY = Array.new(vNum);
+
+        let bTX = Array.new(vNum);
+        let bTY = Array.new(vNum);
+
+        // Setup Array references for current and previous transformations.
+        let currTX = aTX;
+        let currTY = aTY;
+        let prevTX = bTX;
+        let prevTY = bTY;
+        let current = false;
+
+        return this;
+    }
+
+    /** Destructor */
+    method void dispose () {
+        do vX.dispose();
+        do vY.dispose();
+        do aTX.dispose();
+        do aTY.dispose();
+        do bTX.dispose();
+        do bTY.dispose();
+
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Dump polygon coordinates to screen. */
+    method void dump () {
+        var int i;
+        do Output.moveCursor(0, 0);
+        do Output.printString("Poly coords: ");
+        let i = 0;
+        while (i < numVertices) {
+            do Output.printInt(vX[i]);
+            do Output.printString(", ");
+            do Output.printInt(vY[i]);
+            do Output.printString(", ");
+            do Output.printInt(currTX[i]);
+            do Output.printString(", ");
+            do Output.printInt(currTY[i]);
+            do Output.printString(", ");
+            do Output.printInt(prevTX[i]);
+            do Output.printString(", ");
+            do Output.printInt(prevTY[i]);
+            do Output.println();
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /**
+     * Return the absolute value of the largest coordinate.
+     */
+    method int getMax () {
+        var int i;
+        var int max;
+
+        while (i < numVertices) {
+            if (Math.abs(vX[i]) > max) {
+                let max = Math.abs(vX[i]);
+            }
+            if (Math.abs(vY[i]) > max) {
+                let max = Math.abs(vY[i]);
+            }
+            let i = i + 1;
+        }
+        return max;
+    }
+
+    /**
+     * Push vertices into master vertex arrays.
+     */
+    method void push(int x, int y) {
+        if (head > numVertices) {   // Don't try to push more vertices.
+            return;
+        }
+
+        let vX[head] = x;
+        let vY[head] = y;
+        let head = head + 1;
+
+        return;
+    }
+
+    /**
+     * Initialise transformed coordinates array
+     *
+     * Useful for manipulating coordinates to be stored as master.
+     *
+     * source:  0 - Zero transform array.
+     *          1 - Initialise from master.
+     */
+    method void initTransform (int source) {
+        var int i;
+        if (source = 1) {
+            do Transform.copy(currTX, currTY, vX, vY, numVertices);
+            return;
+        }
+        if (source = 0) {
+            let i = 0;
+            while (i < numVertices) {
+                let currTX[i] = 0;
+                let currTY[i] = 0;
+                let i = i + 1;
+            }
+            return;
+        }
+        return;
+    }
+
+    /**
+     * Store transformed coordinates as master.
+     *
+     * Useful for permanently scaling a DrawPoly to a different size.
+     */
+    method void storeMaster() {
+        do Transform.copy(vX, vY, currTX, currTY, numVertices);
+        return;
+    }
+
+    /**
+     * Store transformed coordinates for erase.
+     *
+     * This is handled by swapping Array references for current
+     * and previous transformations.
+     */
+    method void storePrev() {
+        if (current) {
+            let currTX = aTX;
+            let currTY = aTY;
+            let prevTX = bTX;
+            let prevTY = bTY;
+            let current = false;
+        } else {
+            let currTX = bTX;
+            let currTY = bTY;
+            let prevTX = aTX;
+            let prevTY = aTY;
+            let current = true;
+        }
+
+        // Reset transformed coordinates array from master ready for next
+        // transforms.
+        do Transform.copy(currTX, currTY, vX, vY, numVertices);
+        return;
+    }
+
+    /**
+     * Rotate vertices around origin by a(ngle) degrees.
+     */
+    method void rotate(int a) {
+        do Transform.rotate(currTX, currTY, currTX, currTY, numVertices, a);
+        return;
+    }
+
+    /**
+     * Scale vertices in X and Y axis.
+     *
+     * Take care not to overflow from product of vertex and numerator.
+     */
+    method void scale(int numX, int denX, int numY, int denY) {
+        do Transform.scale(currTX, currTY, currTX, currTY, numVertices, numX, denX, numY, denY);
+        return;
+    }
+
+    /**
+     * Translate vertices to given coordinates.
+     */
+    method void translate(int x, int y) {
+        do Transform.translate(currTX, currTY, currTX, currTY, numVertices, x, y);
+        return;
+    }
+
+    /**
+     * Erase previous translated coordinate poly from screen.
+     */
+    method void erase() {
+        // Erase previous poly.
+        do Screen.setColor(true);
+        do draw(prevTX, prevTY, numVertices, true);
+        return;
+    }
+
+    /**
+     * Erase previous translated coordinate poly and draw new
+     * translated coordinate poly to screen.
+     */
+    method void redraw() {
+        // Erase previous poly.
+        do Screen.setColor(true);
+        do draw(prevTX, prevTY, numVertices, true);
+
+        // Draw poly.
+        do Screen.setColor(false);
+        do draw(currTX, currTY, numVertices, true);
+
+        return;
+    }
+
+    /**
+     * Draw a polygon in current set color given an array of X and Y vertices,
+     * and the number of vertices.
+     *
+     * TODO
+     * mode:    0 - Draw poly open.
+     *          1 - Draw poly closed.
+     *          2 - Consider poly to be a set of independent, unjoined lines.
+     *          3 - Consider poly to be a set of independent, unjoined points.
+     *
+     */
+    method void draw(Array vX, Array vY, int vNum, bool closed) {
+        var int i;
+        var int j;
+
+        let i = 0;
+        while (i < (vNum - 1)) {
+            let j = i + 1;
+            do Screen.drawLine(vX[i], vY[i], vX[j], vY[j]);
+            let i = j;
+        }
+        if (closed = true) {
+            do Screen.drawLine(vX[i], vY[i], vX[0], vY[0]);
+        }
+
+        return;
+    }
+
+ }

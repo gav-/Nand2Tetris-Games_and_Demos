@@ -1,0 +1,128 @@
+/**
+ * Transform coordinates static class.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ class Transform {
+
+    /**
+     * Copy coordinate arrays.
+     */
+    function void copy(Array outX, Array outY, Array inX, Array inY, int vNum) {
+        var int i;
+
+        let i = 0;
+        while (i < vNum) {
+            let outX[i] = inX[i];
+            let outY[i] = inY[i];
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /**
+      * Rotate coordinate arrays around origin by A(ngle) degrees.
+      *
+      * Where 0 <= A(ngle) < 360
+      *
+      * Xrotated = X * COS(angle) - Y * SIN(angle)
+      * Yrotated = X * SIN(angle) + Y * COS(angle)
+      */
+    function void rotate (Array outX, Array outY, Array inX, Array inY, int vNum, int A) {
+        var int i;
+        var int A90;
+        var int sinA;
+        var int cosA;
+        var int tmpX;
+        var int tmpY;
+
+        let sinA = Sinus.sin(A);
+        let cosA = Sinus.cos(A);
+
+        // Apply rotational transformation to supplied input coordinates.
+        let i = 0;
+        while (i < vNum) {
+            // Because inX and outX may be the same Array reference, we need
+            // temporary variables here.
+
+            // Note that we are using fixed point arithmetic (2 decimal places)
+            let tmpX = (inX[i] * cosA) - (inY[i] * sinA);
+            let tmpY = (inX[i] * sinA) + (inY[i] * cosA);
+
+            // Adjust for rounding.
+            if (tmpX < 0) {
+                let tmpX = tmpX - 50;
+            } else {
+                if (tmpX > 0) {
+                    let tmpX = tmpX + 50;
+                }
+            }
+
+            if (tmpY < 0) {
+                let tmpY = tmpY - 50;
+            } else {
+                if (tmpY > 0) {
+                    let tmpY = tmpY + 50;
+                }
+            }
+
+            // Round to integer.
+            let outX[i] = tmpX / 100;
+            let outY[i] = tmpY / 100;
+
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /**
+     * Scale coordinate arrays by numerator and denominator in the X and Y axis.
+     *
+     * Because the values are first multiplied by the numerator before dividing
+     * by the denominator, care must be taken to prevent overflow.
+     */
+    function void scale (Array outX, Array outY, Array inX, Array inY, int vNum, int numX, int denX, int numY, int denY) {
+        var int i;
+        while (i < vNum) {
+            let outX[i] = (inX[i] * numX) / denX;
+            let outY[i] = (inY[i] * numY) / denY;
+            let i = i + 1;
+        }
+        return;
+    }
+
+     /**
+      * Translate coordinate arrays by a given offset.
+      */
+    function void translate (Array outX, Array outY, Array inX, Array inY, int vNum, int dX, int dY) {
+        var int i;
+        let i = 0;
+        while (i < vNum) {
+            let outX[i] = inX[i] + dX;
+            let outY[i] = inY[i] + dY;
+            let i = i + 1;
+        }
+        return;
+    }
+ }

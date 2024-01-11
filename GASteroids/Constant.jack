@@ -1,0 +1,44 @@
+/**
+ * Constants static container class.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class Constant {
+
+    // Array containing playing field coordinates: x1, y1, x2, y2
+    // Coordinates in one decimal point fixed floating point (* 10)
+    static Array fieldXY;
+
+    function void init () {
+        let fieldXY = Array.new(4);
+        let fieldXY[0] =  65 * 10;      // x1 (leave a left hand border)
+        let fieldXY[1] =   0 * 10;      // y1
+        let fieldXY[2] = 511 * 10;      // x2
+        let fieldXY[3] = 255 * 10;      // y2
+
+        return;
+    }
+
+    function Array getFieldXY () {
+        return fieldXY;
+    }
+}

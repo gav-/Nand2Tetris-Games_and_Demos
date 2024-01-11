@@ -1,0 +1,67 @@
+function Score.init 0
+push constant 1
+neg
+pop static 1
+push argument 0
+pop static 0
+push constant 1
+neg
+pop static 3
+push constant 0
+pop static 2
+push constant 0
+return
+function Score.changeLife 0
+push static 0
+pop static 1
+push static 0
+push argument 0
+add
+pop static 0
+push constant 0
+return
+function Score.changeScore 0
+push static 2
+pop static 3
+push static 2
+push argument 0
+add
+pop static 2
+push constant 0
+return
+function Score.lifeChanged 0
+push static 0
+push static 1
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push static 0
+pop static 1
+push static 0
+return
+goto IF_END0
+label IF_FALSE0
+push constant 1
+neg
+return
+label IF_END0
+function Score.scoreChanged 0
+push static 2
+push static 3
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push static 2
+pop static 3
+push static 2
+return
+goto IF_END0
+label IF_FALSE0
+push constant 1
+neg
+return
+label IF_END0

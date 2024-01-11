@@ -1,0 +1,74 @@
+/**
+ * Score static class.
+ *
+ * Keeps track of lives and score.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class Score {
+    static int lives;
+    static int prevLives;
+
+    static int score;
+    static int prevScore;
+
+    function void init (int numLives) {
+        let prevLives = -1;
+        let lives = numLives;
+
+        let prevScore = -1;
+        let score = 0;
+
+        return;
+    }
+
+    function void changeLife (int dLife) {
+        let prevLives = lives;
+        let lives = lives + dLife;
+        return;
+    }
+
+    function void changeScore (int dScore) {
+        let prevScore = score;
+        let score = score + dScore;
+        return;
+    }
+
+    function int lifeChanged() {
+        if (~ (lives = prevLives)) {
+            let prevLives = lives;
+            return lives;
+        } else {
+            return -1;
+        }
+    }
+
+    function int scoreChanged() {
+        if (~ (score = prevScore)) {
+            let prevScore = score;
+            return score;
+        } else {
+            return -1;
+        }
+    }
+}

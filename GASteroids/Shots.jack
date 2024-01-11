@@ -1,0 +1,230 @@
+/**
+ * GASteroids Shots class.
+ *
+ * For projectiles fired into space.
+ *
+ * Copyright 2013-2016 Gavin Stewart.
+ *
+ * You are required to give attribution to the author (Gavin Stewart) for any
+ * use of this program (GPLv3 Section 7b).
+ *
+ * Trying to pass off my code as your own in your Elements of Computing classes
+ * will result in a cursed life of forever buggy software.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+class Shots {
+    field int numShots;
+
+    // Radius for collision detection.
+    field int r;
+
+    // Ring buffer of shots.
+    // Value is ticks remaining till shot expired.
+    field Array shots;
+
+    // Position of next available shot in shots Array.
+    field int head;
+
+    // Position of most recent shot in shots Array.
+    field int last;
+
+    // How long a shot lives.
+    field int tickExpire;
+
+    // How long between shots.
+    field int tickBetween;
+
+    // Shot firing velocity.
+    field int initVelocity;
+
+    // X and Y coordinates of shots.
+    field Array x;
+    field Array y;
+
+    // X and Y velocities of shots.
+    field Array vx;
+    field Array vy;
+
+    // X and Y coordinates of shot in previous tick.
+    // Used for erase.
+    field Array px;
+    field Array py;
+
+    // Array reference to Constant.fieldXY
+    field Array fieldXY;
+
+    constructor Shots new (int sNum) {
+        let numShots = sNum;
+        let fieldXY = Constant.getFieldXY();
+
+        let r = 1 * 10;
+        let tickExpire = 25;
+        let tickBetween = 4;
+        let initVelocity = 8;  // Velocity in screen pixels per tick.
+
+        let shots = Array.new(numShots);
+        let x = Array.new(numShots);
+        let y = Array.new(numShots);
+        let vx = Array.new(numShots);
+        let vy = Array.new(numShots);
+        let px = Array.new(numShots);
+        let py = Array.new(numShots);
+
+        return this;
+    }
+
+    method void dispose () {
+        do shots.dispose();
+        do x.dispose();
+        do y.dispose();
+        do vx.dispose();
+        do vy.dispose();
+        do px.dispose();
+        do py.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /**
+     * Fire a new shot, if possible.
+     */
+    method void fire(int sX, int sY, int sVX, int sVY, int sA) {
+        if (~(shots[head] = 0)) {       // All shots are in flight.
+            return;
+        }
+        if ((tickExpire - shots[last]) < tickBetween) {  // Too close to prev.
+            return;
+        }
+
+        let shots[head] = tickExpire;   // New shot.
+        let x[head] = sX;
+        let y[head] = sY;
+
+        // Sinus is two decimal places fixed point (* 100), we store
+        // velocities as one decimal place fixed point (* 10).
+        let vx[head] = sVX + ((Sinus.sin(sA) / 10) * initVelocity);
+        let vy[head] = sVY - ((Sinus.cos(sA) / 10) * initVelocity);
+
+        let last = head;
+        let head = head + 1;
+        if (head = numShots) {      // Shift head back to beginning of array.
+            let head = 0;
+        }
+
+        return;
+    }
+
+    /**
+     * Redraw shots.
+     */
+    method void redraw() {
+        var int i;
+
+        // Erase shots from previous tick.
+        do Screen.setColor(true);
+        let i = 0;
+        while (i < numShots) {
+            if (shots[i] > 0) {
+                do Screen.drawPixel(px[i] / 10, py[i] / 10);
+            }
+            let i = i + 1;
+        }
+
+        // Draw current shot position.
+        do Screen.setColor(false);
+        let i = 0;
+        while (i < numShots) {
+            if (shots[i] > 0) {
+                do Screen.drawPixel(x[i] / 10, y[i] / 10);
+            }
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /**
+     * Tick shots game mechanics.
+     */
+    method void tick (Array asteroids, int numAsteroids) {
+        var int i;
+        var int tmpX;
+        var int tmpY;
+        var int j;
+        var Asteroid a;
+
+        do Screen.setColor(true);   // Better to call once than in loop.
+                                    // Pixels are drawn to erase expired shots.
+
+        // Iterate shots array, decrement shot expiry, update position.
+        // Velocity and Position are one decimal place fixed point (* 10).
+        let i = 0;
+        while (i < numShots) {
+            if (shots[i] > 0) {
+                // Decrement expiry counter.
+                let shots[i] = shots[i] - 1;
+
+                if (shots[i] = 0) {
+                    // This was last tick, so erase from screen now.
+                    do Screen.drawPixel(x[i] / 10, y[i] / 10);
+                    return;
+                }
+
+                // Update position from velocity.
+                let tmpX = x[i] + vx[i];
+                let tmpY = y[i] + vy[i];
+
+                // Check bounds and wrap on screen.
+                if (tmpX < (fieldXY[0] + r)) {
+                    let tmpX = fieldXY[2] - r;
+                } else {
+                    if (tmpX > (fieldXY[2] - r)) {
+                        let tmpX = fieldXY[0] + r;
+                    }
+                }
+
+                if (tmpY < (fieldXY[1] + r)) {
+                    let tmpY = fieldXY[3] - r;
+                } else {
+                    if (tmpY > (fieldXY[3] - r)) {
+                        let tmpY = fieldXY[1] + r;
+                    }
+                }
+
+                let px[i] = x[i];
+                let py[i] = y[i];
+                let x[i] = tmpX;
+                let y[i] = tmpY;
+
+                // Check for asteroid collisions.
+                let j = 0;
+                while (j < numAsteroids) {
+                    let a = asteroids[j];
+                    let a = a.collision(x[i], y[i], r);
+                    if (a) {
+                        // Shot/Asteroid collision.
+                        do Score.changeScore(10);
+                        do a.destroyed();
+                        let shots[i] = 1;   // Last tick for this shot.
+                    }
+                    let j = j + 1;
+                }
+            }
+            let i = i + 1;
+        }
+        return;
+    }
+
+}
